@@ -1,69 +1,113 @@
-# CodeIgniter 4 Application Starter
+# Kuliner Khas Medan
 
-## What is CodeIgniter?
+Aplikasi web untuk menjelajahi kuliner khas **Kota Medan**: daftar restoran, detail dan menu, serta restoran terdekat dengan peta. Dibuat dengan CodeIgniter 4 dan PostgreSQL.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+> Catatan data: harga menu masih **estimasi**, bukan harga asli. Status halal banyak yang belum terverifikasi. Penilaian "khas Medan" masih perlu disetujui tim.
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## Fitur
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+- **Daftar restoran**: filter kategori, pencarian nama, urut rating, 20 per halaman.
+- **Detail restoran**: info, tautan Google Maps, daftar menu, dan peta lokasi.
+- **Restoran terdekat**: pilih titik patokan atau pakai lokasi browser, radius 1 sampai 5 km, hasil di peta dan daftar. Jarak dihitung garis lurus, bukan jarak tempuh.
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## Kebutuhan
 
-## Installation & updates
+- PHP 8.2 atau lebih baru (PHP 8.5 butuh CodeIgniter 4.7.0 ke atas), dengan ekstensi `intl`, `mbstring`, `pgsql`, `curl`, `xml`
+- Composer
+- PostgreSQL
+- Git
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+## Cara memasang
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+~~~bash
+git clone https://github.com/Shofyawch/kuliner-medan-app.git
+cd kuliner-medan-app
+composer install
+~~~
 
-## Setup
+### 1. Buat database
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+~~~bash
+sudo -u postgres createdb kuliner_medan
+sudo -u postgres psql -d kuliner_medan < database/schema.sql
+sudo -u postgres psql -d kuliner_medan < database/seed.sql
+~~~
 
-## Important Change with index.php
+Cek hasilnya, harus 83 dan 305:
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+~~~bash
+sudo -u postgres psql -d kuliner_medan -c "SELECT COUNT(*) FROM restoran;"
+sudo -u postgres psql -d kuliner_medan -c "SELECT COUNT(*) FROM menu;"
+~~~
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+Atur password pengguna postgres milikmu sendiri:
 
-**Please** read the user guide for a better explanation of how CI4 works!
+~~~bash
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'isi_password_sendiri';"
+~~~
 
-## Repository Management
+### 2. Buat file `.env`
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+~~~bash
+cp env .env
+~~~
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+Lalu tambahkan di bagian bawah `.env` (ganti password dengan milikmu):
 
-## Server Requirements
+~~~
+CI_ENVIRONMENT = development
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+database.default.hostname = localhost
+database.default.database = kuliner_medan
+database.default.username = postgres
+database.default.password = isi_password_sendiri
+database.default.DBDriver = Postgre
+database.default.port = 5432
+database.default.charset = utf8
+~~~
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+Baris `charset = utf8` wajib. Tanpa itu muncul error `invalid value for parameter "client_encoding"`.
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+File `.env` **jangan** diunggah ke GitHub dan password **jangan** dikirim lewat chat.
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+### 3. Jalankan
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+~~~bash
+php spark serve
+~~~
+
+Buka http://localhost:8080.
+
+## Struktur penting
+
+| Berkas | Fungsi |
+|---|---|
+| `app/Controllers/Kuliner.php` | Daftar dan detail restoran |
+| `app/Controllers/Terdekat.php` | Restoran terdekat |
+| `app/Models/RestoranModel.php`, `MenuModel.php` | Model tabel |
+| `app/Views/kuliner/` | Tampilan (index, detail, terdekat) |
+| `app/Config/Routes.php` | Rute |
+| `database/schema.sql`, `seed.sql` | Struktur dan isi database |
+
+Rute: `/` (daftar), `/restoran/{slug}` (detail), `/terdekat` (terdekat).
+
+## Database
+
+- Tabel `restoran` dan `menu` (relasi lewat `restoran_id`).
+- Fungsi `restoran_terdekat(lat, lng, radius_km, limit)` mengembalikan restoran terdekat dalam radius tertentu.
+- Kolom `id` belum auto-increment; perlu diubah sebelum ada fitur tambah data dari aplikasi.
+
+## Bekerja bareng
+
+- Sebelum mulai: `git pull`.
+- Setelah selesai: `git add .`, `git commit -m "pesan singkat"`, `git push`.
+- Bagi tugas per bagian supaya tidak mengedit berkas yang sama.
+- Perubahan data hanya ada di database masing-masing. Kalau data diubah, perbarui `database/seed.sql` lalu commit, atau sepakati satu orang pemegang data utama.
+
+## Yang masih direncanakan
+
+Perapian tampilan (UI/UX), filter lebih lengkap, halaman admin, foto restoran, perapian data bersama tim, dan deploy.
+
+## Lisensi
+
+MIT (lihat berkas `LICENSE`).
