@@ -44,6 +44,8 @@ class Terdekat extends BaseController
             'pilihan' => $pilihan,
             'radius'  => $radius,
             'asal'    => $asal,
+            'lat'     => $lat,
+            'lng'     => $lng,
             'hasil'   => $hasil,
         ]);
     }

@@ -20,6 +20,8 @@ button.gps{background:#2f6f3e}
 .jarak{float:right;font-weight:bold;color:#2f6f3e}
 .catatan{color:#666;font-size:13px}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>#peta{height:360px;border-radius:10px;margin-bottom:12px}</style>
 </head>
 <body>
 <header>
@@ -56,6 +58,7 @@ button.gps{background:#2f6f3e}
       <p>Belum ada restoran di radius ini. Coba perbesar radius atau pilih titik patokan.</p>
     <?php endif; ?>
 
+    <div id="peta"></div>
     <?php foreach ($hasil as $r): ?>
       <?php $j = (float) $r['jarak_km']; ?>
       <a class="kartu" href="/restoran/<?= esc($r['slug']) ?>">
@@ -85,5 +88,41 @@ document.getElementById('gps').addEventListener('click', function () {
   }, { timeout: 10000 });
 });
 </script>
+<?php if ($hasil !== null && $lat !== null): ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+<?php $f = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT; ?>
+var asal = <?= json_encode(['lat' => (float) $lat, 'lng' => (float) $lng, 'nama' => $asal], $f) ?>;
+var data = <?= json_encode(array_map(fn($r) => [
+    'nama' => $r['nama'], 'slug' => $r['slug'], 'kategori_khas' => $r['kategori_khas'],
+    'latitude' => $r['latitude'], 'longitude' => $r['longitude'], 'jarak_km' => $r['jarak_km'],
+], $hasil), $f) ?>;
+
+var peta = L.map('peta').setView([asal.lat, asal.lng], 15);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; kontributor OpenStreetMap'
+}).addTo(peta);
+
+L.circleMarker([asal.lat, asal.lng], {radius: 9, color: '#2f6f3e', fillColor: '#2f6f3e', fillOpacity: 0.9})
+  .addTo(peta).bindTooltip(asal.nama, {permanent: false});
+
+var batas = [[asal.lat, asal.lng]];
+data.forEach(function (r) {
+  var lat = parseFloat(r.latitude), lng = parseFloat(r.longitude);
+  var el = document.createElement('div');
+  var a = document.createElement('a');
+  a.href = '/restoran/' + encodeURIComponent(r.slug);
+  a.textContent = r.nama;
+  var s = document.createElement('div');
+  s.textContent = r.kategori_khas + ' \u00b7 ' + r.jarak_km + ' km';
+  el.appendChild(a);
+  el.appendChild(s);
+  L.marker([lat, lng]).addTo(peta).bindPopup(el);
+  batas.push([lat, lng]);
+});
+if (batas.length > 1) { peta.fitBounds(batas, {padding: [30, 30]}); }
+</script>
+<?php endif; ?>
 </body>
 </html>

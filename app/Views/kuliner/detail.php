@@ -16,6 +16,8 @@ td,th{padding:8px 4px;border-bottom:1px solid #eee;text-align:left}
 td.harga{text-align:right;white-space:nowrap}
 .catatan{color:#a05a00;font-size:14px}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>#peta{height:300px;border-radius:10px}</style>
 </head>
 <body>
 <header>
@@ -46,6 +48,20 @@ td.harga{text-align:right;white-space:nowrap}
       </table>
     <?php endif; ?>
   </div>
+  <div class="box">
+    <h2>Lokasi</h2>
+    <div id="peta"></div>
+  </div>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var lat = <?= (float) $r['latitude'] ?>, lng = <?= (float) $r['longitude'] ?>;
+var peta = L.map('peta').setView([lat, lng], 16);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; kontributor OpenStreetMap'
+}).addTo(peta);
+L.marker([lat, lng]).addTo(peta);
+</script>
 </body>
 </html>
