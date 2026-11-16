@@ -27,7 +27,7 @@ class Kuliner extends BaseController
             $model->like('nama', $cari, 'both', null, true);
         }
 
-        $restoran = $model->orderBy('rating', 'DESC')->paginate(20);
+        $restoran = $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false)->paginate(20);
         $model->pager->only(['kategori', 'q']);
 
         return view('kuliner/index', [
