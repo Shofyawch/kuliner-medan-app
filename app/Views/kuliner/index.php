@@ -1,11 +1,21 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('konten') ?>
+<?php
+$param = array_filter([
+    'q' => $cari, 'kecamatan' => $kecamatan, 'harga' => $harga, 'urut' => $urut,
+]);
+$aktifFilter = $kategori || $param;
+$linkKat = static function (?string $k) use ($param): string {
+    $q = http_build_query($param + ($k ? ['kategori' => $k] : []));
+    return '/' . ($q !== '' ? '?' . $q : '');
+};
+?>
 <section class="hero">
   <div class="wadah">
     <h1>Kuliner Khas Medan</h1>
     <p><?= array_sum(array_column($daftarKategori, 'jumlah')) ?> restoran pilihan di Kota Medan</p>
-    <form class="cari" method="get" action="/">
+    <form id="form-cari" class="cari" method="get" action="/">
       <?php if ($kategori): ?><input type="hidden" name="kategori" value="<?= esc($kategori) ?>"><?php endif; ?>
       <input type="text" name="q" placeholder="Cari nama restoran..." value="<?= esc($cari ?? '') ?>" aria-label="Cari nama restoran">
       <button type="submit">Cari</button>
@@ -16,20 +26,41 @@
 
 <div class="wadah">
   <nav class="kategori" aria-label="Kategori">
-    <a href="/" class="<?= $kategori ? '' : 'aktif' ?>">Semua</a>
+    <a href="<?= esc($linkKat(null)) ?>" class="<?= $kategori ? '' : 'aktif' ?>">Semua</a>
     <?php foreach ($daftarKategori as $k): ?>
-      <a href="/?kategori=<?= urlencode($k['kategori_khas']) ?>" class="<?= $kategori === $k['kategori_khas'] ? 'aktif' : '' ?>">
+      <a href="<?= esc($linkKat($k['kategori_khas'])) ?>" class="<?= $kategori === $k['kategori_khas'] ? 'aktif' : '' ?>">
         <?= esc($k['kategori_khas']) ?> (<?= $k['jumlah'] ?>)
       </a>
     <?php endforeach; ?>
   </nav>
+
+  <div class="filter">
+    <select name="kecamatan" form="form-cari" aria-label="Kecamatan" onchange="this.form.submit()">
+      <option value="">Semua kecamatan</option>
+      <?php foreach ($daftarKecamatan as $kc): ?>
+        <option value="<?= esc($kc['kecamatan']) ?>" <?= $kecamatan === $kc['kecamatan'] ? 'selected' : '' ?>><?= esc($kc['kecamatan']) ?> (<?= $kc['jumlah'] ?>)</option>
+      <?php endforeach; ?>
+    </select>
+    <select name="harga" form="form-cari" aria-label="Harga" onchange="this.form.submit()">
+      <option value="">Semua harga</option>
+      <option value="murah" <?= $harga === 'murah' ? 'selected' : '' ?>>Murah (sampai Rp 25 rb)</option>
+      <option value="sedang" <?= $harga === 'sedang' ? 'selected' : '' ?>>Sedang (Rp 25&ndash;60 rb)</option>
+      <option value="mahal" <?= $harga === 'mahal' ? 'selected' : '' ?>>Mahal (di atas Rp 60 rb)</option>
+    </select>
+    <select name="urut" form="form-cari" aria-label="Urutkan" onchange="this.form.submit()">
+      <option value="">Paling cocok</option>
+      <option value="rating" <?= $urut === 'rating' ? 'selected' : '' ?>>Rating tertinggi</option>
+      <option value="murah" <?= $urut === 'murah' ? 'selected' : '' ?>>Harga termurah</option>
+    </select>
+    <?php if ($aktifFilter): ?><a href="/">Atur ulang</a><?php endif; ?>
+  </div>
 
   <p class="info-hasil"><?= $pager->getTotal() ?> restoran ditemukan</p>
 
   <?php if (empty($restoran)): ?>
     <div class="kosong">
       <p><b>Belum ada restoran yang cocok.</b></p>
-      <p>Coba kata kunci lain atau pilih kategori &ldquo;Semua&rdquo;.</p>
+      <p>Coba kurangi filter atau ganti kata kunci.</p>
     </div>
   <?php endif; ?>
 
@@ -58,7 +89,6 @@
           <?php endif; ?>
         </div>
         <div>
-          <?php if ($max > 0): ?><span class="label">Harga estimasi</span><?php endif; ?>
           <?php if ($halal !== ''): ?>
             <span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : '' ?>"><?= esc($halal) ?></span>
           <?php endif; ?>

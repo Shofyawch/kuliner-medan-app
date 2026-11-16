@@ -102,3 +102,12 @@ button.tombol:disabled{opacity:.6;cursor:wait}
   .dua-kolom[data-tampil="peta"] .daftar{display:none}
   .dua-kolom[data-tampil="daftar"] .kolom-peta{display:none}
 }
+
+/* foto menu */
+.menu-nama{display:flex;align-items:center;gap:12px}
+.menu-foto{width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none}
+
+/* filter beranda */
+.filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 4px}
+.filter select{padding:9px 12px;border:1px solid var(--garis);border-radius:10px;background:#fff;font-size:14px;font-family:inherit;max-width:100%}
+.filter a{font-size:14px;color:var(--marun)}

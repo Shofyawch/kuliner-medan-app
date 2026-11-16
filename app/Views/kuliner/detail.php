@@ -11,6 +11,11 @@ $min   = (int) ($r['harga_min'] ?? 0);
 $max   = (int) ($r['harga_max'] ?? 0);
 $halal = trim((string) ($r['info_halal'] ?? ''));
 
+$fotoMenu = static function (string $nama): ?string {
+    $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($nama)), '-');
+    return ($slug !== '' && is_file(FCPATH . 'img/menu/' . $slug . '.jpg')) ? '/img/menu/' . $slug . '.jpg' : null;
+};
+
 $perKategori = [];
 foreach ($menu as $m) {
     $nama = trim((string) ($m['kategori'] ?? ''));
@@ -35,7 +40,7 @@ foreach ($menu as $m) {
       <p class="rating">&#9733; <?= esc($r['rating']) ?> <small>(<?= esc($r['jumlah_ulasan']) ?> ulasan)</small></p>
       <p><?= esc($r['alamat']) ?></p>
       <p>
-        <?php if ($max > 0): ?><span class="label">Harga estimasi: Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
+        <?php if ($max > 0): ?><span class="label">Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
         <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : '' ?>"><?= esc($halal) ?></span><?php endif; ?>
       </p>
       <?php if (!empty($r['deskripsi'])): ?><p><?= esc($r['deskripsi']) ?></p><?php endif; ?>
@@ -47,16 +52,18 @@ foreach ($menu as $m) {
 
   <section class="panel">
     <h2>Menu</h2>
-    <p class="catatan">Harga masih estimasi, bukan harga asli.</p>
     <?php if (empty($menu)): ?>
       <p>Belum ada data menu.</p>
     <?php else: ?>
       <?php foreach ($perKategori as $namaKat => $daftar): ?>
         <h3 class="menu-grup"><?= esc($namaKat) ?></h3>
-        <?php foreach ($daftar as $m): ?>
+        <?php foreach ($daftar as $m): $fm = $fotoMenu((string) $m['nama_menu']); ?>
           <div class="menu-baris">
-            <span><?= esc($m['nama_menu']) ?></span>
-            <span class="menu-harga">~Rp <?= number_format((int) $m['harga'], 0, ',', '.') ?></span>
+            <span class="menu-nama">
+              <?php if ($fm): ?><img class="menu-foto" src="<?= esc($fm) ?>" alt="<?= esc($m['nama_menu']) ?>" loading="lazy"><?php endif; ?>
+              <span><?= esc($m['nama_menu']) ?></span>
+            </span>
+            <span class="menu-harga">Rp <?= number_format((int) $m['harga'], 0, ',', '.') ?></span>
           </div>
         <?php endforeach; ?>
       <?php endforeach; ?>

@@ -23,7 +23,7 @@
 
 <footer class="dasar">
   <div class="wadah">
-    <p>Harga menu masih estimasi, bukan harga asli. Status halal belum semuanya terverifikasi.</p>
+    <p>Harga dapat berbeda sewaktu-waktu. Status halal belum semuanya terverifikasi.</p>
     <p>Peta &copy; kontributor OpenStreetMap.</p>
   </div>
 </footer>

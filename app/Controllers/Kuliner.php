@@ -10,34 +10,79 @@ class Kuliner extends BaseController
 {
     public function index()
     {
-        $model    = new RestoranModel();
-        $kategori = $this->request->getGet('kategori');
-        $cari     = $this->request->getGet('q');
+        $ambil = function (string $nama): ?string {
+            $v = $this->request->getGet($nama);
+            return is_string($v) && $v !== '' ? $v : null;
+        };
 
-        $daftarKategori = db_connect()->table('restoran')
+        $kategori  = $ambil('kategori');
+        $cari      = $ambil('q');
+        $kecamatan = $ambil('kecamatan');
+        $harga     = $ambil('harga');
+        $urut      = $ambil('urut');
+
+        if (!in_array($harga, ['murah', 'sedang', 'mahal'], true)) {
+            $harga = null;
+        }
+        if (!in_array($urut, ['rating', 'murah'], true)) {
+            $urut = null;
+        }
+
+        $db = db_connect();
+        $daftarKategori = $db->table('restoran')
             ->select('kategori_khas, COUNT(*) AS jumlah')
             ->groupBy('kategori_khas')
             ->orderBy('jumlah', 'DESC')
             ->get()->getResultArray();
 
+        $daftarKecamatan = $db->table('restoran')
+            ->select('kecamatan, COUNT(*) AS jumlah')
+            ->where('kecamatan IS NOT NULL', null, false)
+            ->groupBy('kecamatan')
+            ->orderBy('kecamatan')
+            ->get()->getResultArray();
+
+        $model = new RestoranModel();
         if ($kategori) {
             $model->where('kategori_khas', $kategori);
         }
         if ($cari) {
             $model->like('nama', $cari, 'both', null, true);
         }
+        if ($kecamatan) {
+            $model->where('kecamatan', $kecamatan);
+        }
+        if ($harga === 'murah') {
+            $model->where('harga_max <=', 25000);
+        } elseif ($harga === 'sedang') {
+            $model->where('harga_max >', 25000)->where('harga_max <=', 60000);
+        } elseif ($harga === 'mahal') {
+            $model->where('harga_max >', 60000);
+        }
 
-        $restoran = $model
-            ->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false)
-            ->paginate(20);
-        $model->pager->only(['kategori', 'q']);
+        if ($urut === 'rating') {
+            $model->orderBy('COALESCE(rating,0)', 'DESC', false)
+                  ->orderBy('COALESCE(jumlah_ulasan,0)', 'DESC', false);
+        } elseif ($urut === 'murah') {
+            $model->orderBy('COALESCE(harga_min,999999999)', 'ASC', false)
+                  ->orderBy('nama', 'ASC');
+        } else {
+            $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false);
+        }
+
+        $restoran = $model->paginate(20);
+        $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'urut']);
 
         return view('kuliner/index', [
-            'restoran'       => $restoran,
-            'pager'          => $model->pager,
-            'daftarKategori' => $daftarKategori,
-            'kategori'       => $kategori,
-            'cari'           => $cari,
+            'restoran'        => $restoran,
+            'pager'           => $model->pager,
+            'daftarKategori'  => $daftarKategori,
+            'daftarKecamatan' => $daftarKecamatan,
+            'kategori'        => $kategori,
+            'cari'            => $cari,
+            'kecamatan'       => $kecamatan,
+            'harga'           => $harga,
+            'urut'            => $urut,
         ]);
     }
 
