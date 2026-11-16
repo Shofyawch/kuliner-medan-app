@@ -67,3 +67,6 @@
 #--------------------------------------------------------------------
 
 # logger.threshold = 4
+
+# Kunci API untuk sistem lain (pisahkan dengan koma). Buat: openssl rand -hex 32
+# API_KEYS =
