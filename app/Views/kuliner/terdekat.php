@@ -1,99 +1,98 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Restoran Terdekat - Kuliner Khas Medan</title>
-<style>
-body{font-family:system-ui,sans-serif;margin:0;background:#faf7f2;color:#222}
-header{background:#8b1e1e;color:#fff;padding:20px 16px}
-header a{color:#fff}
-main{max-width:800px;margin:0 auto;padding:16px}
-.box{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.baris{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-select{padding:10px;border:1px solid #ccc;border-radius:8px;background:#fff}
-button{padding:10px 16px;border:0;background:#8b1e1e;color:#fff;border-radius:8px;cursor:pointer}
-button.gps{background:#2f6f3e}
-.kartu{display:block;background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.kartu h3{margin:0 0 4px}
-.kartu small{color:#666}
-.jarak{float:right;font-weight:bold;color:#2f6f3e}
-.catatan{color:#666;font-size:13px}
-</style>
+<?= $this->extend('layouts/main') ?>
+
+<?= $this->section('head') ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<style>#peta{height:360px;border-radius:10px;margin-bottom:12px}</style>
-</head>
-<body>
-<header>
-  <a href="/">&larr; Kembali</a>
-  <h1 style="margin:6px 0 0">Restoran Terdekat</h1>
-</header>
-<main>
-  <div class="box">
-    <form method="get" action="/terdekat">
-      <div class="baris">
-        <select name="patokan">
-          <option value="">Pilih titik patokan...</option>
-          <?php foreach ($patokan as $kode => $p): ?>
-            <option value="<?= esc($kode) ?>" <?= $pilihan === $kode ? 'selected' : '' ?>><?= esc($p[0]) ?></option>
-          <?php endforeach; ?>
-        </select>
-        <select name="radius" id="radius">
-          <?php foreach ([1, 2, 3, 5] as $o): ?>
-            <option value="<?= $o ?>" <?= (float) $o === (float) $radius ? 'selected' : '' ?>>Radius <?= $o ?> km</option>
-          <?php endforeach; ?>
-        </select>
-        <button type="submit">Cari</button>
-      </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('konten') ?>
+<?php
+$punyaAsal = $hasil !== null && $lat !== null;
+$dasar     = ($pilihan && isset($patokan[$pilihan])) ? ['patokan' => $pilihan] : ['lat' => $lat, 'lng' => $lng];
+$fmtJarak  = static fn ($j) => $j < 1 ? round($j * 1000) . ' m' : number_format($j, 1, ',', '.') . ' km';
+?>
+<div class="wadah">
+  <h1 class="judul-halaman">Restoran Terdekat</h1>
+
+  <section class="panel">
+    <form method="get" action="/terdekat" class="kontrol">
+      <select name="patokan" aria-label="Titik patokan">
+        <option value="">Pilih titik patokan...</option>
+        <?php foreach ($patokan as $kode => $p): ?>
+          <option value="<?= esc($kode) ?>" <?= $pilihan === $kode ? 'selected' : '' ?>><?= esc($p[0]) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <input type="hidden" name="radius" value="<?= esc($radius) ?>">
+      <button type="submit" class="tombol">Cari</button>
+      <button type="button" class="tombol hijau" id="gps">Gunakan lokasi saya</button>
     </form>
-    <button type="button" class="gps" id="gps">Gunakan lokasi saya</button>
-    <p id="pesan" class="catatan"></p>
-  </div>
-
-  <?php if ($hasil !== null): ?>
-    <p><b><?= count($hasil) ?> restoran</b> dalam radius <?= esc($radius) ?> km dari <b><?= esc($asal) ?></b></p>
-    <p class="catatan">Jarak dihitung garis lurus, bukan jarak tempuh lewat jalan.</p>
-
-    <?php if (empty($hasil)): ?>
-      <p>Belum ada restoran di radius ini. Coba perbesar radius atau pilih titik patokan.</p>
+    <p id="pesan" class="catatan" role="status"></p>
+    <?php if (!$punyaAsal): ?>
+      <p class="catatan">Pilih titik patokan atau gunakan lokasimu, lalu lihat restoran di sekitarnya.</p>
     <?php endif; ?>
+  </section>
 
-    <div id="peta"></div>
-    <?php foreach ($hasil as $r): ?>
-      <?php $j = (float) $r['jarak_km']; ?>
-      <a class="kartu" href="/restoran/<?= esc($r['slug']) ?>">
-        <span class="jarak"><?= $j < 1 ? round($j * 1000) . ' m' : number_format($j, 1, ',', '.') . ' km' ?></span>
-        <h3><?= esc($r['nama']) ?></h3>
-        <small><?= esc($r['kategori_khas']) ?> &middot; <?= esc($r['kecamatan']) ?> &middot; &#9733; <?= esc($r['rating']) ?></small>
-      </a>
-    <?php endforeach; ?>
-  <?php else: ?>
-    <p class="catatan">Pilih titik patokan atau gunakan lokasimu, lalu lihat restoran di sekitarnya.</p>
+  <?php if ($punyaAsal): ?>
+    <div class="pil" aria-label="Radius pencarian">
+      <?php foreach ([1, 2, 3, 5] as $o): ?>
+        <a href="/terdekat?<?= esc(http_build_query($dasar + ['radius' => $o])) ?>" class="<?= (float) $o === (float) $radius ? 'aktif' : '' ?>"><?= $o ?> km</a>
+      <?php endforeach; ?>
+    </div>
+
+    <p><b><?= count($hasil) ?> restoran</b> dalam radius <?= esc($radius) ?> km dari <b><?= esc($asal) ?></b>.
+      <span class="sub">Jarak garis lurus, bukan jarak tempuh lewat jalan.</span></p>
+
+    <div class="tab-hp">
+      <button type="button" class="aktif" data-tampil="peta">Peta</button>
+      <button type="button" data-tampil="daftar">Daftar</button>
+    </div>
+
+    <div class="dua-kolom" id="dua-kolom" data-tampil="peta">
+      <div class="kolom-peta"><div id="peta" class="peta"></div></div>
+
+      <div class="daftar sekitar panel">
+        <?php if (empty($hasil)): ?>
+          <p class="catatan">Belum ada restoran di radius ini. Coba perbesar radius atau pilih titik patokan lain.</p>
+        <?php endif; ?>
+        <?php foreach ($hasil as $r): ?>
+          <a href="/restoran/<?= esc($r['slug']) ?>">
+            <span><b><?= esc($r['nama']) ?></b><br>
+              <span class="sub"><?= esc($r['kategori_khas']) ?> &middot; <?= esc($r['kecamatan']) ?> &middot; &#9733; <?= esc($r['rating']) ?></span></span>
+            <span class="jarak"><?= $fmtJarak((float) $r['jarak_km']) ?></span>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
   <?php endif; ?>
-</main>
+</div>
+<?= $this->endSection() ?>
 
+<?= $this->section('skrip') ?>
 <script>
 document.getElementById('gps').addEventListener('click', function () {
+  var tombol = this;
   var pesan = document.getElementById('pesan');
   if (!navigator.geolocation) {
     pesan.textContent = 'Browser ini tidak mendukung lokasi.';
     return;
   }
-  pesan.textContent = 'Mengambil lokasi...';
+  tombol.disabled = true;
+  pesan.textContent = 'Mengambil lokasimu...';
   navigator.geolocation.getCurrentPosition(function (p) {
-    var r = document.getElementById('radius').value;
+    var r = document.querySelector('input[name=radius]').value;
     window.location = '/terdekat?lat=' + p.coords.latitude + '&lng=' + p.coords.longitude + '&radius=' + r;
   }, function () {
+    tombol.disabled = false;
     pesan.textContent = 'Lokasi tidak bisa diambil. Izinkan akses lokasi di browser, atau pilih titik patokan.';
   }, { timeout: 10000 });
 });
 </script>
-<?php if ($hasil !== null && $lat !== null): ?>
+
+<?php if ($punyaAsal): ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 <?php $f = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT; ?>
-var asal = <?= json_encode(['lat' => (float) $lat, 'lng' => (float) $lng, 'nama' => $asal], $f) ?>;
-var data = <?= json_encode(array_map(fn($r) => [
+var asal = <?= json_encode(['lat' => (float) $lat, 'lng' => (float) $lng, 'nama' => $asal, 'radius' => (float) $radius], $f) ?>;
+var data = <?= json_encode(array_map(static fn ($r) => [
     'nama' => $r['nama'], 'slug' => $r['slug'], 'kategori_khas' => $r['kategori_khas'],
     'latitude' => $r['latitude'], 'longitude' => $r['longitude'], 'jarak_km' => $r['jarak_km'],
 ], $hasil), $f) ?>;
@@ -104,25 +103,35 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; kontributor OpenStreetMap'
 }).addTo(peta);
 
-L.circleMarker([asal.lat, asal.lng], {radius: 9, color: '#2f6f3e', fillColor: '#2f6f3e', fillOpacity: 0.9})
-  .addTo(peta).bindTooltip(asal.nama, {permanent: false});
+var lingkaran = L.circle([asal.lat, asal.lng], {radius: asal.radius * 1000, color: '#2f6f3e', weight: 1.5, fillColor: '#2f6f3e', fillOpacity: 0.06}).addTo(peta);
+L.circleMarker([asal.lat, asal.lng], {radius: 9, color: '#fff', weight: 2, fillColor: '#2f6f3e', fillOpacity: 1})
+  .addTo(peta).bindTooltip(asal.nama);
 
-var batas = [[asal.lat, asal.lng]];
 data.forEach(function (r) {
-  var lat = parseFloat(r.latitude), lng = parseFloat(r.longitude);
+  var j = parseFloat(r.jarak_km);
+  var teksJarak = j < 1 ? Math.round(j * 1000) + ' m' : j.toFixed(1).replace('.', ',') + ' km';
   var el = document.createElement('div');
   var a = document.createElement('a');
   a.href = '/restoran/' + encodeURIComponent(r.slug);
   a.textContent = r.nama;
   var s = document.createElement('div');
-  s.textContent = r.kategori_khas + ' \u00b7 ' + r.jarak_km + ' km';
+  s.textContent = r.kategori_khas + ' \u00b7 ' + teksJarak;
   el.appendChild(a);
   el.appendChild(s);
-  L.marker([lat, lng]).addTo(peta).bindPopup(el);
-  batas.push([lat, lng]);
+  L.marker([parseFloat(r.latitude), parseFloat(r.longitude)]).addTo(peta).bindPopup(el);
 });
-if (batas.length > 1) { peta.fitBounds(batas, {padding: [30, 30]}); }
+peta.fitBounds(lingkaran.getBounds(), {padding: [20, 20]});
+
+var wadah = document.getElementById('dua-kolom');
+var tabs = document.querySelectorAll('.tab-hp button');
+tabs.forEach(function (b) {
+  b.addEventListener('click', function () {
+    wadah.setAttribute('data-tampil', b.dataset.tampil);
+    tabs.forEach(function (x) { x.classList.toggle('aktif', x === b); });
+    if (b.dataset.tampil === 'peta') { setTimeout(function () { peta.invalidateSize(); }, 50); }
+  });
+});
+window.addEventListener('load', function () { peta.invalidateSize(); peta.fitBounds(lingkaran.getBounds(), {padding: [20, 20]}); });
 </script>
 <?php endif; ?>
-</body>
-</html>
+<?= $this->endSection() ?>

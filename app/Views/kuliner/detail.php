@@ -1,67 +1,101 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= esc($r['nama']) ?> - Kuliner Khas Medan</title>
-<style>
-body{font-family:system-ui,sans-serif;margin:0;background:#faf7f2;color:#222}
-header{background:#8b1e1e;color:#fff;padding:20px 16px}
-header a{color:#fff}
-main{max-width:800px;margin:0 auto;padding:16px}
-.box{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-h1{margin:6px 0 0}
-table{width:100%;border-collapse:collapse}
-td,th{padding:8px 4px;border-bottom:1px solid #eee;text-align:left}
-td.harga{text-align:right;white-space:nowrap}
-.catatan{color:#a05a00;font-size:14px}
-</style>
+<?= $this->extend('layouts/main') ?>
+
+<?= $this->section('head') ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<style>#peta{height:300px;border-radius:10px}</style>
-</head>
-<body>
-<header>
-  <a href="/">&larr; Kembali</a>
-  <h1><?= esc($r['nama']) ?></h1>
-</header>
-<main>
-  <div class="box">
-    <p><b><?= esc($r['kategori_khas']) ?></b> &middot; <?= esc($r['kecamatan']) ?> &middot; &#9733; <?= esc($r['rating']) ?> (<?= esc($r['jumlah_ulasan']) ?> ulasan)</p>
-    <p><?= esc($r['alamat']) ?></p>
-    <?php if (!empty($r['deskripsi'])): ?><p><?= esc($r['deskripsi']) ?></p><?php endif; ?>
-    <?php if (!empty($r['link_maps'])): ?><p><a href="<?= esc($r['link_maps'], 'url') ?>" target="_blank" rel="noopener">Buka di Google Maps</a></p><?php endif; ?>
+<?= $this->endSection() ?>
+
+<?= $this->section('konten') ?>
+<?php
+$foto  = is_file(FCPATH . 'img/restoran/' . $r['id'] . '.jpg') ? '/img/restoran/' . $r['id'] . '.jpg' : null;
+$min   = (int) ($r['harga_min'] ?? 0);
+$max   = (int) ($r['harga_max'] ?? 0);
+$halal = trim((string) ($r['info_halal'] ?? ''));
+
+$perKategori = [];
+foreach ($menu as $m) {
+    $nama = trim((string) ($m['kategori'] ?? ''));
+    $perKategori[$nama !== '' ? $nama : 'Lainnya'][] = $m;
+}
+?>
+<div class="wadah">
+  <a class="kembali" href="/">&larr; Semua restoran</a>
+
+  <div class="detail-atas">
+    <div class="foto-besar">
+      <?php if ($foto): ?>
+        <img src="<?= esc($foto) ?>" alt="<?= esc($r['nama']) ?>">
+      <?php else: ?>
+        <span class="inisial"><?= esc(mb_strtoupper(mb_substr($r['nama'], 0, 1))) ?></span>
+      <?php endif; ?>
+    </div>
+
+    <div class="detail-info">
+      <span class="sub"><?= esc($r['kategori_khas']) ?> &middot; <?= esc($r['kecamatan']) ?></span>
+      <h1><?= esc($r['nama']) ?></h1>
+      <p class="rating">&#9733; <?= esc($r['rating']) ?> <small>(<?= esc($r['jumlah_ulasan']) ?> ulasan)</small></p>
+      <p><?= esc($r['alamat']) ?></p>
+      <p>
+        <?php if ($max > 0): ?><span class="label">Harga estimasi: Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
+        <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : '' ?>"><?= esc($halal) ?></span><?php endif; ?>
+      </p>
+      <?php if (!empty($r['deskripsi'])): ?><p><?= esc($r['deskripsi']) ?></p><?php endif; ?>
+      <?php if (!empty($r['link_maps'])): ?>
+        <p><a class="tombol" href="<?= esc($r['link_maps'], 'url') ?>" target="_blank" rel="noopener">Buka di Google Maps</a></p>
+      <?php endif; ?>
+    </div>
   </div>
 
-  <div class="box">
+  <section class="panel">
     <h2>Menu</h2>
     <p class="catatan">Harga masih estimasi, bukan harga asli.</p>
     <?php if (empty($menu)): ?>
       <p>Belum ada data menu.</p>
     <?php else: ?>
-      <table>
-        <?php foreach ($menu as $m): ?>
-          <tr>
-            <td><?= esc($m['nama_menu']) ?><br><small><?= esc($m['kategori']) ?></small></td>
-            <td class="harga">Rp <?= number_format((int) $m['harga'], 0, ',', '.') ?></td>
-          </tr>
+      <?php foreach ($perKategori as $namaKat => $daftar): ?>
+        <h3 class="menu-grup"><?= esc($namaKat) ?></h3>
+        <?php foreach ($daftar as $m): ?>
+          <div class="menu-baris">
+            <span><?= esc($m['nama_menu']) ?></span>
+            <span class="menu-harga">~Rp <?= number_format((int) $m['harga'], 0, ',', '.') ?></span>
+          </div>
         <?php endforeach; ?>
-      </table>
+      <?php endforeach; ?>
     <?php endif; ?>
-  </div>
-  <div class="box">
+  </section>
+
+  <section class="panel">
     <h2>Lokasi</h2>
-    <div id="peta"></div>
-  </div>
-</main>
+    <div id="peta" class="peta"></div>
+  </section>
+
+  <?php if (!empty($sekitar)): ?>
+  <section class="panel sekitar">
+    <h2>Restoran lain di sekitar</h2>
+    <p class="catatan">Jarak garis lurus dari restoran ini.</p>
+    <?php foreach ($sekitar as $s): $j = (float) $s['jarak_km']; ?>
+      <a href="/restoran/<?= esc($s['slug']) ?>">
+        <span><b><?= esc($s['nama']) ?></b><br><span class="sub"><?= esc($s['kategori_khas']) ?> &middot; <?= esc($s['kecamatan']) ?></span></span>
+        <span class="jarak"><?= $j < 1 ? round($j * 1000) . ' m' : number_format($j, 1, ',', '.') . ' km' ?></span>
+      </a>
+    <?php endforeach; ?>
+  </section>
+  <?php endif; ?>
+</div>
+<?= $this->endSection() ?>
+
+<?= $this->section('skrip') ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 var lat = <?= (float) $r['latitude'] ?>, lng = <?= (float) $r['longitude'] ?>;
+var nama = <?= json_encode($r['nama'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 var peta = L.map('peta').setView([lat, lng], 16);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; kontributor OpenStreetMap'
 }).addTo(peta);
-L.marker([lat, lng]).addTo(peta);
+var isi = document.createElement('b');
+isi.textContent = nama;
+L.marker([lat, lng]).addTo(peta).bindPopup(isi);
+window.addEventListener('load', function () { peta.invalidateSize(); peta.setView([lat, lng], 16); });
 </script>
-</body>
-</html>
+<?= $this->endSection() ?>

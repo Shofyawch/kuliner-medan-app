@@ -27,7 +27,9 @@ class Kuliner extends BaseController
             $model->like('nama', $cari, 'both', null, true);
         }
 
-        $restoran = $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false)->paginate(20);
+        $restoran = $model
+            ->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false)
+            ->paginate(20);
         $model->pager->only(['kategori', 'q']);
 
         return view('kuliner/index', [
@@ -52,6 +54,21 @@ class Kuliner extends BaseController
             ->orderBy('nama_menu')
             ->findAll();
 
-        return view('kuliner/detail', ['r' => $restoran, 'menu' => $menu]);
+        $sekitar = [];
+        if (is_numeric($restoran['latitude']) && is_numeric($restoran['longitude'])) {
+            $semua = db_connect()
+                ->query('SELECT * FROM restoran_terdekat(?, ?, ?, ?)', [
+                    (float) $restoran['latitude'], (float) $restoran['longitude'], 2.0, 8,
+                ])->getResultArray();
+            $semua   = array_filter($semua, static fn ($x) => $x['slug'] !== $slug);
+            $sekitar = array_slice(array_values($semua), 0, 5);
+        }
+
+        return view('kuliner/detail', [
+            'r'       => $restoran,
+            'menu'    => $menu,
+            'sekitar' => $sekitar,
+            'judul'   => $restoran['nama'] . ' - Kuliner Khas Medan',
+        ]);
     }
 }
