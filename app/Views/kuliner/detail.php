@@ -44,8 +44,8 @@ foreach ($menu as $m) {
         <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : '') ?>"><?= esc($halal) ?></span><?php endif; ?>
       </p>
       <?php if (!empty($r['deskripsi'])): ?><p><?= esc($r['deskripsi']) ?></p><?php endif; ?>
-      <?php if (!empty($r['link_maps'])): ?>
-        <p><a class="tombol" href="<?= esc($r['link_maps'], 'url') ?>" target="_blank" rel="noopener">Buka di Google Maps</a></p>
+      <?php if (!empty($r['link_maps']) && preg_match('#^https?://#i', $r['link_maps'])): ?>
+        <p><a class="tombol" href="<?= esc($r['link_maps'], 'attr') ?>" target="_blank" rel="noopener">Buka di Google Maps</a></p>
       <?php endif; ?>
     </div>
   </div>
