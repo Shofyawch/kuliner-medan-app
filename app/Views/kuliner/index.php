@@ -66,7 +66,7 @@ $linkKat = static function (?string $k) use ($param): string {
 
   <div class="grid">
   <?php foreach ($restoran as $r):
-    $foto  = is_file(FCPATH . 'img/restoran/' . $r['id'] . '.jpg') ? '/img/restoran/' . $r['id'] . '.jpg' : null;
+    $foto  = (!empty($r['link_foto']) && is_file(FCPATH . $r['link_foto'])) ? '/' . $r['link_foto'] : null;
     $min   = (int) ($r['harga_min'] ?? 0);
     $max   = (int) ($r['harga_max'] ?? 0);
     $halal = trim((string) ($r['info_halal'] ?? ''));

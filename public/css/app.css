@@ -111,3 +111,38 @@ button.tombol:disabled{opacity:.6;cursor:wait}
 .filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 4px}
 .filter select{padding:9px 12px;border:1px solid var(--garis);border-radius:10px;background:#fff;font-size:14px;font-family:inherit;max-width:100%}
 .filter a{font-size:14px;color:var(--marun)}
+
+/* Foto seragam: semua kartu pakai rasio 4:3 */
+.kartu { display: flex; flex-direction: column; }
+.kartu .foto {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.kartu .foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.kartu .isi { flex: 1; display: flex; flex-direction: column; }
+.kartu .isi .baris-kartu { margin-top: auto; }
+
+/* Halaman detail */
+.foto-besar {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+.foto-besar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.kartu .foto, .foto-besar { display: block; }
+.kartu .foto .inisial, .foto-besar .inisial {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+}
