@@ -90,7 +90,7 @@ $linkKat = static function (?string $k) use ($param): string {
         </div>
         <div>
           <?php if ($halal !== ''): ?>
-            <span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : '' ?>"><?= esc($halal) ?></span>
+            <span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : '') ?>"><?= esc($halal) ?></span>
           <?php endif; ?>
         </div>
       </div>

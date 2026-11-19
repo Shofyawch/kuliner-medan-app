@@ -87,3 +87,4 @@ UPDATE restoran SET link_foto='img/restoran/rm-bpk-ola-kisat.jpg' WHERE slug='rm
 UPDATE restoran SET link_foto='img/restoran/oleh-oleh-medan-dendeng-batokok-a.jpg' WHERE slug='oleh-oleh-medan-dendeng-batokok-ande-ika';
 UPDATE restoran SET link_foto='img/restoran/cahaya-baru-indianfood-rumah-makan-caha.jpg' WHERE slug='cahaya-baru-indianfood-rumah-makan-cahaya-baru-jabu-mangan-cahaya-baru';
 UPDATE restoran SET link_foto='img/restoran/bika-ambon-zulaikha-jl-gagak-hitam.jpg' WHERE slug='bika-ambon-zulaikha-2';
+UPDATE restoran SET link_foto='img/restoran/rumah-makan-bpk-tambunan.jpg' WHERE slug='rumah-makan-bpk-tambunan';

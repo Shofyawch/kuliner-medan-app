@@ -41,7 +41,7 @@ foreach ($menu as $m) {
       <p><?= esc($r['alamat']) ?></p>
       <p>
         <?php if ($max > 0): ?><span class="label">Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
-        <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : '' ?>"><?= esc($halal) ?></span><?php endif; ?>
+        <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : '') ?>"><?= esc($halal) ?></span><?php endif; ?>
       </p>
       <?php if (!empty($r['deskripsi'])): ?><p><?= esc($r['deskripsi']) ?></p><?php endif; ?>
       <?php if (!empty($r['link_maps'])): ?>
