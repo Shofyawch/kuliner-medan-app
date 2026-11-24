@@ -45,6 +45,7 @@ class Restoran extends BaseController
             ],
             'rating'        => (float) $r['rating'],
             'jumlah_ulasan' => (int) $r['jumlah_ulasan'],
+            'versi'         => isset($r['versi']) ? (int) $r['versi'] : null,
             'info_halal'    => $r['info_halal'] ?? null,
             'foto'          => $r['link_foto'] ?? null,
         ];
@@ -142,6 +143,8 @@ class Restoran extends BaseController
             'no_telepon'    => $r['no_telepon'] ?? null,
             'link_maps'     => $r['link_maps'] ?? null,
             'menu'          => array_map(static fn ($m) => [
+                'id'        => (int) $m['id'],
+                'versi'     => (int) ($m['versi'] ?? 1),
                 'nama'      => $m['nama_menu'],
                 'harga'     => (int) $m['harga'],
                 'kategori'  => $m['kategori'],
