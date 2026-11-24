@@ -1,0 +1,103 @@
+// ERD Kuliner Khas Medan. Tempel isi file ini di https://dbdiagram.io (menu Import > DBML)
+// lalu Export > PNG/PDF untuk laporan dan slide.
+
+Table restoran {
+  id integer [pk, note: 'otomatis dari sequence']
+  nama text [not null]
+  slug text [not null, unique]
+  alamat text [not null]
+  kecamatan text [not null]
+  latitude numeric(9,6) [not null]
+  longitude numeric(9,6) [not null]
+  kategori_khas text [not null]
+  keyakinan_khas text
+  jenis_masakan text [not null]
+  harga_min integer
+  harga_max integer
+  price_level_google smallint
+  jam_buka time
+  jam_tutup time
+  catatan_jam text
+  rating numeric(2,1) [not null, default: 0, note: 'CHECK 0 sampai 5']
+  jumlah_ulasan integer [not null, default: 0]
+  no_telepon text
+  info_halal text
+  link_foto text
+  link_maps text
+  deskripsi text
+  google_place_id text [unique]
+  versi integer [not null, default: 1, note: 'naik otomatis (trigger), untuk penanganan konflik']
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    kategori_khas
+    kecamatan
+    rating
+  }
+}
+
+Table menu {
+  id integer [pk]
+  restoran_id integer [not null]
+  nama_menu text [not null]
+  harga integer [not null, note: 'CHECK >= 0']
+  kategori text [not null]
+  status_harga text
+  deskripsi text
+  versi integer [not null, default: 1]
+  updated_at timestamptz
+
+  indexes {
+    restoran_id
+  }
+}
+
+Table pengguna {
+  id integer [pk, increment]
+  username text [not null, unique]
+  password_hash text [not null, note: 'bcrypt (password_hash PHP)']
+  role text [not null, note: "'admin' atau 'user'"]
+  aktif boolean [not null, default: true]
+  created_at timestamptz [not null]
+}
+
+Table ulasan {
+  id integer [pk, increment]
+  restoran_id integer [not null]
+  pengguna_id integer [not null]
+  rating smallint [not null, note: 'CHECK 1 sampai 5']
+  komentar text [note: 'maksimal 500 karakter']
+  versi integer [not null, default: 1]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (restoran_id, pengguna_id) [unique, name: 'ulasan_satu_per_pengguna']
+    (restoran_id, created_at)
+  }
+}
+
+Table log_integrasi {
+  id bigint [pk, increment]
+  arah text [not null, note: "'masuk' atau 'keluar'"]
+  endpoint text [not null]
+  metode text [not null, default: 'GET']
+  parameter text
+  status_code integer
+  jumlah_data integer
+  durasi_ms integer
+  keterangan text
+  created_at timestamp [not null]
+}
+
+Ref: menu.restoran_id > restoran.id [delete: cascade]
+Ref: ulasan.restoran_id > restoran.id [delete: cascade]
+Ref: ulasan.pengguna_id > pengguna.id [delete: cascade]
+
+// Objek database lain (tidak digambar di ERD):
+//  View     : v_restoran_ringkas, v_ulasan
+//  Function : restoran_terdekat(lat, lng, radius_km, limit)
+//             tambah_restoran_dengan_menu(restoran jsonb, menu jsonb)  -- satu transaksi
+//             trg_naikkan_versi()  -- trigger pada restoran, menu, ulasan
+//  Role     : kuliner_api (baca/tulis), kuliner_readonly (baca)
