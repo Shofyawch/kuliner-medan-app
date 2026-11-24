@@ -1,0 +1,1170 @@
+{
+  "info": {
+    "name": "Kuliner Khas Medan - API v1",
+    "description": "Koleksi uji API. Isi variabel koleksi: admin_password dan (opsional) api_key di kolom CURRENT VALUE, jangan di INITIAL VALUE. Jalankan folder berurutan 1 sampai 4 lewat Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Autentikasi",
+      "item": [
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('token_admin', pm.response.json().data.token); }",
+                  "pm.test('Role admin', function () { pm.expect(pm.response.json().data.role).to.eql('admin'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"{{admin_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login password salah",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', function () { pm.response.to.have.status(401); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"salah-sekali\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Daftar akun uji",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Role selalu user', function () { pm.expect(pm.response.json().data.role).to.eql('user'); });"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const t = Date.now();",
+                  "pm.collectionVariables.set('uname_uji', 'uji_' + t);",
+                  "pm.collectionVariables.set('password_uji', 'Uji' + t + 'x');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/daftar",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{uname_uji}}\",\n  \"password\": \"{{password_uji}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Daftar dengan username yang sama",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () { pm.response.to.have.status(409); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/daftar",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{uname_uji}}\",\n  \"password\": \"{{password_uji}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Daftar dengan password terlalu pendek",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/daftar",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"uji_pendek\",\n  \"password\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login akun uji",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('token_user', pm.response.json().data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{uname_uji}}\",\n  \"password\": \"{{password_uji}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Baca data",
+      "item": [
+        {
+          "name": "Tanpa autentikasi ditolak",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', function () { pm.response.to.have.status(401); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/kategori"
+          }
+        },
+        {
+          "name": "Dengan API key (hanya baca)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": "{{base_url}}/kategori"
+          }
+        },
+        {
+          "name": "Daftar restoran",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Ada pagination', function () { pm.expect(pm.response.json().meta).to.have.property('total_pages'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('slug_contoh', pm.response.json().data[0].slug); }",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('restoran_id_contoh', pm.response.json().data[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran?per_page=5"
+          }
+        },
+        {
+          "name": "Cari restoran (q)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran?q=mie"
+          }
+        },
+        {
+          "name": "Detail restoran + menu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Ada menu dan versi', function () { const d = pm.response.json().data; pm.expect(d).to.have.property('menu'); pm.expect(d).to.have.property('versi'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{slug_contoh}}"
+          }
+        },
+        {
+          "name": "Restoran terdekat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Ada jarak_km', function () { const d = pm.response.json().data; if (d.length) { pm.expect(d[0]).to.have.property('jarak_km'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/terdekat?lat=3.5952&lng=98.6722&radius=3&limit=5"
+          }
+        },
+        {
+          "name": "Terdekat dengan koordinat tidak valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/terdekat?lat=abc&lng=98.6"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Tulis data (admin)",
+      "item": [
+        {
+          "name": "Pengguna biasa mencoba menulis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', function () { pm.response.to.have.status(403); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Warung Postman Uji\",\n  \"alamat\": \"Jl. Uji Postman No. 1, Medan\",\n  \"kecamatan\": \"Medan Kota\",\n  \"latitude\": 3.59,\n  \"longitude\": 98.67,\n  \"kategori_khas\": \"Masakan Uji\",\n  \"jenis_masakan\": \"Uji\",\n  \"harga_min\": 10000,\n  \"harga_max\": 30000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin, data tidak valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"x\",\n  \"latitude\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tambah restoran",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('restoran_id_uji', pm.response.json().data.id); }",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('versi_uji', pm.response.json().data.versi); }",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('versi_lama', pm.response.json().data.versi); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Warung Postman Uji\",\n  \"alamat\": \"Jl. Uji Postman No. 1, Medan\",\n  \"kecamatan\": \"Medan Kota\",\n  \"latitude\": 3.59,\n  \"longitude\": 98.67,\n  \"kategori_khas\": \"Masakan Uji\",\n  \"jenis_masakan\": \"Uji\",\n  \"harga_min\": 10000,\n  \"harga_max\": 30000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ubah restoran (versi benar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Versi naik', function () { pm.expect(pm.response.json().data.versi).to.be.above(Number(pm.collectionVariables.get('versi_lama'))); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('versi_uji', pm.response.json().data.versi); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_uji}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versi\": {{versi_uji}},\n  \"deskripsi\": \"Diubah lewat Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ubah restoran dengan versi lama (konflik)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () { pm.response.to.have.status(409); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Menyebut versi sekarang', function () { pm.expect(pm.response.json().errors).to.have.property('versi_sekarang'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_uji}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versi\": {{versi_lama}},\n  \"deskripsi\": \"Bentrok\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tambah menu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('menu_id_uji', pm.response.json().data.id); }",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('menu_versi_uji', pm.response.json().data.versi); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_uji}}/menu",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_menu\": \"Menu Postman\",\n  \"harga\": 15000,\n  \"kategori\": \"Makanan\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ubah menu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/menu/{{menu_id_uji}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versi\": {{menu_versi_uji}},\n  \"harga\": 17000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Hapus menu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/menu/{{menu_id_uji}}"
+          }
+        },
+        {
+          "name": "Transaksi: restoran + menu sekaligus",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('restoran_id_lengkap', pm.response.json().data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/lengkap",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restoran\": {\n    \"nama\": \"Warung Transaksi Postman\",\n    \"alamat\": \"Jl. Uji Postman No. 1, Medan\",\n    \"kecamatan\": \"Medan Kota\",\n    \"latitude\": 3.59,\n    \"longitude\": 98.67,\n    \"kategori_khas\": \"Masakan Uji\",\n    \"jenis_masakan\": \"Uji\",\n    \"harga_min\": 10000,\n    \"harga_max\": 30000\n  },\n  \"menu\": [\n    {\n      \"nama_menu\": \"Nasi Uji\",\n      \"harga\": 12000,\n      \"kategori\": \"Makanan\"\n    },\n    {\n      \"nama_menu\": \"Teh Uji\",\n      \"harga\": 4000,\n      \"kategori\": \"Minuman\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Hapus restoran (menu ikut terhapus)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_uji}}"
+          }
+        },
+        {
+          "name": "Hapus restoran hasil transaksi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Menu ikut terhapus (cascade)', function () { pm.expect(pm.response.json().data.menu_ikut_terhapus).to.eql(2); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_lengkap}}"
+          }
+        },
+        {
+          "name": "Baca restoran yang sudah dihapus",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/warung-postman-uji"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Ulasan",
+      "item": [
+        {
+          "name": "Tulis ulasan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('ulasan_id', pm.response.json().data.id); }",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('ulasan_versi', pm.response.json().data.versi); }",
+                  "if (pm.response.code < 300) { pm.collectionVariables.set('ulasan_versi_lama', pm.response.json().data.versi); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_contoh}}/ulasan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"komentar\": \"Enak dan murah.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ulasan kedua di restoran yang sama",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () { pm.response.to.have.status(409); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_contoh}}/ulasan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Rating di luar 1-5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_contoh}}/ulasan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Daftar ulasan restoran",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });",
+                  "pm.test('Ada rata-rata rating', function () { pm.expect(pm.response.json().meta).to.have.property('rata_rata_rating'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/restoran/{{restoran_id_contoh}}/ulasan"
+          }
+        },
+        {
+          "name": "Ubah ulasan (versi benar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/ulasan/{{ulasan_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versi\": {{ulasan_versi}},\n  \"rating\": 4,\n  \"komentar\": \"Direvisi.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ubah ulasan dengan versi lama (konflik)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () { pm.response.to.have.status(409); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/ulasan/{{ulasan_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versi\": {{ulasan_versi_lama}},\n  \"rating\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Pengguna biasa membuka moderasi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', function () { pm.response.to.have.status(403); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/ulasan"
+          }
+        },
+        {
+          "name": "Admin melihat semua ulasan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/ulasan"
+          }
+        },
+        {
+          "name": "Admin menghapus ulasan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/ulasan/{{ulasan_id}}"
+          }
+        },
+        {
+          "name": "Hapus ulasan yang sudah tidak ada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/ulasan/{{ulasan_id}}"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "admin_password",
+      "value": ""
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    }
+  ]
+}
