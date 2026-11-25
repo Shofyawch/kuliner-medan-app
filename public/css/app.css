@@ -147,3 +147,12 @@ button.tombol:disabled{opacity:.6;cursor:wait}
   width: 100%; height: 100%;
 }
 .label.nonhalal { background: #fde8e6; color: #9b2c20; }
+
+/* Hotel & Penginapan */
+.alamat-singkat {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+

@@ -25,6 +25,7 @@ class Filters extends BaseFilters
      * or [filter_name => [classname1, classname2, ...]]
      */
     public array $aliases = [
+        'ratelimit'     => \App\Filters\RateLimit::class,
         'apiauth'       => \App\Filters\ApiAuth::class,
         'apikey'        => \App\Filters\ApiKey::class,
         'csrf'          => CSRF::class,
@@ -108,5 +109,8 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'cors'      => ['before' => ['api/*'], 'after' => ['api/*']],
+        'ratelimit' => ['before' => ['api/*']],
+    ];
 }

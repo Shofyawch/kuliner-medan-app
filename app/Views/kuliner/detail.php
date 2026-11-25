@@ -25,6 +25,17 @@ foreach ($menu as $m) {
 <div class="wadah">
   <a class="kembali" href="/">&larr; Semua restoran</a>
 
+  <?php if (session()->getFlashdata('success')): ?>
+    <div style="background:#e8f5e9;border:1px solid #c8e6c9;color:#2e7d32;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+      <?= esc(session()->getFlashdata('success')) ?>
+    </div>
+  <?php endif; ?>
+  <?php if (session()->getFlashdata('error')): ?>
+    <div style="background:#ffebee;border:1px solid #ffcdd2;color:#c62828;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+      <?= esc(session()->getFlashdata('error')) ?>
+    </div>
+  <?php endif; ?>
+
   <div class="detail-atas">
     <div class="foto-besar">
       <?php if ($foto): ?>
@@ -75,6 +86,11 @@ foreach ($menu as $m) {
     <div id="peta" class="peta"></div>
   </section>
 
+  <section class="panel" id="panel-ulasan" data-restoran-id="<?= (int) $r['id'] ?>">
+    <h2>Ulasan pengguna</h2>
+    <p class="catatan">Memuat ulasan...</p>
+  </section>
+
   <?php if (!empty($sekitar)): ?>
   <section class="panel sekitar">
     <h2>Restoran lain di sekitar</h2>
@@ -83,6 +99,93 @@ foreach ($menu as $m) {
       <a href="/restoran/<?= esc($s['slug']) ?>">
         <span><b><?= esc($s['nama']) ?></b><br><span class="sub"><?= esc($s['kategori_khas']) ?> &middot; <?= esc($s['kecamatan']) ?></span></span>
         <span class="jarak"><?= $j < 1 ? round($j * 1000) . ' m' : number_format($j, 1, ',', '.') . ' km' ?></span>
+      </a>
+    <?php endforeach; ?>
+  </section>
+  <?php endif; ?>
+
+  <!-- Section Ulasan Pengunjung Restoran -->
+  <section class="panel">
+    <h2>⭐ Ulasan Pengunjung</h2>
+    <p class="catatan">Pendapat dan pengalaman pengunjung di <?= esc($r['nama']) ?>.</p>
+
+    <?php if (empty($ulasan)): ?>
+      <p style="color:var(--abu);">Belum ada ulasan untuk restoran ini. Jadilah yang pertama memberikan ulasan!</p>
+    <?php else: ?>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
+        <?php foreach ($ulasan as $u): ?>
+          <div style="border-bottom:1px solid var(--garis);padding-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:bold;color:var(--teks);"><?= esc($u['username']) ?></span>
+              <span class="rating">&#9733; <?= esc($u['rating']) ?></span>
+            </div>
+            <?php if (!empty($u['komentar'])): ?>
+              <p style="margin:6px 0 4px;font-size:14px;color:#333;line-height:1.4;"><?= nl2br(esc($u['komentar'])) ?></p>
+            <?php endif; ?>
+            <small style="color:var(--abu);font-size:12px;"><?= date('d M Y, H:i', strtotime($u['created_at'])) ?></small>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+
+    <!-- Kolom Buat Ulasan -->
+    <div style="background:#fdfaf5;border:1px solid var(--garis);padding:18px;border-radius:12px;margin-top:20px;">
+      <?php if (session()->has('pengguna_id')): ?>
+        <h3 style="margin-top:0;font-size:18px;color:var(--marun);">
+          <?= $ulasanSaya ? '✏️ Ubah Ulasan Anda' : '✍️ Tulis Ulasan untuk ' . esc($r['nama']) ?>
+        </h3>
+        <form method="post" action="/restoran/<?= esc($r['slug']) ?>/ulasan">
+          <?= csrf_field() ?>
+          <div style="margin-bottom:12px;">
+            <label for="rating" style="display:block;font-weight:600;margin-bottom:4px;font-size:14px;">Beri Rating:</label>
+            <select name="rating" id="rating" style="padding:8px 12px;border:1px solid var(--garis);border-radius:8px;background:#fff;font-family:inherit;" required>
+              <option value="5" <?= ($ulasanSaya['rating'] ?? 5) === 5 ? 'selected' : '' ?>>⭐⭐⭐⭐⭐ (5 - Sangat Enak / Rekomendasi)</option>
+              <option value="4" <?= ($ulasanSaya['rating'] ?? 0) === 4 ? 'selected' : '' ?>>⭐⭐⭐⭐ (4 - Enak & Puas)</option>
+              <option value="3" <?= ($ulasanSaya['rating'] ?? 0) === 3 ? 'selected' : '' ?>>⭐⭐⭐ (3 - Cukup Enak)</option>
+              <option value="2" <?= ($ulasanSaya['rating'] ?? 0) === 2 ? 'selected' : '' ?>>⭐⭐ (2 - Kurang Puas)</option>
+              <option value="1" <?= ($ulasanSaya['rating'] ?? 0) === 1 ? 'selected' : '' ?>>⭐ (1 - Kecewa)</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <label for="komentar" style="display:block;font-weight:600;margin-bottom:4px;font-size:14px;">Komentar / Pengalaman Kuliner:</label>
+            <textarea name="komentar" id="komentar" rows="3" placeholder="Ceritakan rasa masakan, suasana, atau pelayanan di sini... (maks 500 karakter)" style="width:100%;max-width:600px;padding:9px 12px;border:1px solid var(--garis);border-radius:8px;font-family:inherit;font-size:14px;" maxlength="500"><?= esc($ulasanSaya['komentar'] ?? '') ?></textarea>
+          </div>
+
+          <button type="submit" class="tombol">
+            <?= $ulasanSaya ? 'Perbarui Ulasan' : 'Kirim Ulasan' ?>
+          </button>
+        </form>
+      <?php else: ?>
+        <div style="text-align:center;padding:12px;">
+          <p style="margin:0 0 8px;font-weight:600;">Ingin menulis ulasan untuk restoran ini?</p>
+          <p style="margin:0;font-size:14px;color:var(--abu);">
+            Silakan <a href="/login" style="color:var(--marun);font-weight:bold;">Masuk ke akun</a> atau <a href="/daftar" style="color:var(--marun);font-weight:bold;">Daftar akun baru</a> terlebih dahulu.
+          </p>
+        </div>
+      <?php endif; ?>
+    </div>
+  </section>
+
+  <?php if (!empty($hotelSekitar)): ?>
+  <section class="panel sekitar">
+    <h2>🏨 Penginapan Terdekat di Sekitar Sini</h2>
+    <p class="catatan">Hotel terdekat terintegrasi dari API Singgah Medan.</p>
+    <?php foreach ($hotelSekitar as $hs):
+      $jh = (float) $hs['jarak_km'];
+      $sarapanHs = trim((string) ($hs['sarapan'] ?? ''));
+      $adaSarapanHs = !empty($sarapanHs) && (strcasecmp($sarapanHs, 'ya') === 0 || stripos($sarapanHs, 'all-in') !== false);
+    ?>
+      <a href="/hotel/<?= esc($hs['id']) ?>">
+        <span>
+          <b><?= esc($hs['nama']) ?></b>
+          <?php if ($adaSarapanHs): ?>
+            <span class="label" style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:1px 6px;margin-left:4px;">Sarapan</span>
+          <?php endif; ?>
+          <br>
+          <span class="sub">Kec. <?= esc($hs['kecamatan'] ?? 'Medan') ?> &middot; &#9733; <?= esc($hs['rating'] ?? '0') ?> (<?= esc($hs['jumlah_ulasan'] ?? '0') ?> ulasan)</span>
+        </span>
+        <span class="jarak"><?= $jh < 1 ? round($jh * 1000) . ' m' : number_format($jh, 1, ',', '.') . ' km' ?></span>
       </a>
     <?php endforeach; ?>
   </section>

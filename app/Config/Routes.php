@@ -6,6 +6,20 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Kuliner::index');
 $routes->get('restoran/(:segment)', 'Kuliner::detail/$1');
 $routes->get('terdekat', 'Terdekat::index');
+$routes->get('hotel', 'Hotel::index');
+$routes->get('hotel/(:num)', 'Hotel::detail/$1');
+$routes->post('hotel/(:num)/ulasan', 'Hotel::kirimUlasan/$1');
+$routes->post('hotel/(:num)/ulasan/(:num)/hapus', 'Hotel::hapusUlasan/$1/$2');
+
+// ---- Autentikasi Pengguna Web ----
+$routes->get('login', 'Auth::login');
+$routes->post('login', 'Auth::prosesLogin');
+$routes->get('daftar', 'Auth::daftar');
+$routes->post('daftar', 'Auth::prosesDaftar');
+$routes->get('logout', 'Auth::logout');
+
+// ---- Kirim Ulasan Restoran Web ----
+$routes->post('restoran/(:segment)/ulasan', 'Kuliner::simpanUlasan/$1');
 
 
 // ---- API v1 ----
@@ -36,10 +50,10 @@ $routes->group('api/v1', ['filter' => 'apiauth:admin', 'namespace' => 'App\Contr
 // ---- API v1: pendaftaran, ulasan ----
 $routes->group('api/v1', ['namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
     $routes->post('auth/daftar', 'Auth::daftar');
+    $routes->get('restoran/(:num)/ulasan', 'Ulasan::daftar/$1');
 });
 
 $routes->group('api/v1', ['filter' => 'apiauth', 'namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
-    $routes->get('restoran/(:num)/ulasan', 'Ulasan::daftar/$1');
 });
 
 $routes->group('api/v1', ['filter' => 'apiauth:login', 'namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
@@ -50,4 +64,15 @@ $routes->group('api/v1', ['filter' => 'apiauth:login', 'namespace' => 'App\Contr
 
 $routes->group('api/v1', ['filter' => 'apiauth:admin', 'namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
     $routes->get('ulasan', 'Ulasan::semua');
+});
+
+// ---- API v1: preflight CORS dan alamat yang tidak dikenal (selalu paling bawah) ----
+$routes->options('api/v1/(:any)', static function () {
+    return service('response')->setStatusCode(204);
+});
+$routes->match(['get', 'post', 'put', 'patch', 'delete'], 'api/v1/(:any)', static function () {
+    return service('response')->setStatusCode(404)->setJSON([
+        'status'  => 'error',
+        'message' => 'Alamat API tidak ditemukan.',
+    ]);
 });

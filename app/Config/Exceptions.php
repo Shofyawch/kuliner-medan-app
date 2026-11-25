@@ -101,6 +101,10 @@ class Exceptions extends BaseConfig
      */
     public function handler(int $statusCode, Throwable $exception): ExceptionHandlerInterface
     {
+        if (! is_cli() && str_starts_with(trim(service('request')->getPath(), '/'), 'api/')) {
+            return new \App\Libraries\ApiExceptionHandler();
+        }
+
         return new ExceptionHandler($this);
     }
 }

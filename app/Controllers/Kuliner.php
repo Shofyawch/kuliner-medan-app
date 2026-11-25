@@ -100,6 +100,7 @@ class Kuliner extends BaseController
             ->findAll();
 
         $sekitar = [];
+        $hotelSekitar = [];
         if (is_numeric($restoran['latitude']) && is_numeric($restoran['longitude'])) {
             $semua = db_connect()
                 ->query('SELECT * FROM restoran_terdekat(?, ?, ?, ?)', [
@@ -107,13 +108,119 @@ class Kuliner extends BaseController
                 ])->getResultArray();
             $semua   = array_filter($semua, static fn ($x) => $x['slug'] !== $slug);
             $sekitar = array_slice(array_values($semua), 0, 5);
+
+            // Ambil hotel terdekat dari API Singgah Medan menggunakan koordinat GPS & kecamatan restoran
+            $hotelService = new \App\Libraries\HotelService();
+            $hotelSekitar = $hotelService->getHotelsNear(
+                (float) $restoran['latitude'],
+                (float) $restoran['longitude'],
+                $restoran['kecamatan'] ?? null,
+                5.0,
+                4
+            );
+        }
+
+        // Ambil ulasan dari v_ulasan
+        $db = db_connect();
+        $ulasan = [];
+        try {
+            $ulasan = $db->table('v_ulasan')
+                ->where('restoran_id', $restoran['id'])
+                ->orderBy('created_at', 'DESC')
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal memuat ulasan: ' . $e->getMessage());
+        }
+
+        // Cek ulasan pengguna saat ini
+        $ulasanSaya = null;
+        $penggunaId = session()->get('pengguna_id');
+        if ($penggunaId) {
+            try {
+                $ulasanSaya = $db->table('ulasan')
+                    ->where('restoran_id', $restoran['id'])
+                    ->where('pengguna_id', $penggunaId)
+                    ->get()->getRowArray();
+            } catch (\Throwable $e) {}
         }
 
         return view('kuliner/detail', [
-            'r'       => $restoran,
-            'menu'    => $menu,
-            'sekitar' => $sekitar,
-            'judul'   => $restoran['nama'] . ' - Kuliner Khas Medan',
+            'r'            => $restoran,
+            'menu'         => $menu,
+            'sekitar'      => $sekitar,
+            'hotelSekitar' => $hotelSekitar,
+            'ulasan'       => $ulasan,
+            'ulasanSaya'   => $ulasanSaya,
+            'judul'        => $restoran['nama'] . ' - Kuliner Khas Medan',
         ]);
+    }
+
+    public function simpanUlasan(string $slug)
+    {
+        $penggunaId = session()->get('pengguna_id');
+        if (!$penggunaId) {
+            return redirect()->to('/login')->with('error', 'Silakan masuk terlebih dahulu untuk menulis ulasan.');
+        }
+
+        $restoran = (new RestoranModel())->where('slug', $slug)->first();
+        if ($restoran === null) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $rating   = (int) $this->request->getPost('rating');
+        $komentar = trim((string) $this->request->getPost('komentar'));
+
+        if ($rating < 1 || $rating > 5) {
+            return redirect()->to('/restoran/' . $slug)->with('error', 'Rating wajib antara 1 sampai 5.');
+        }
+        if (mb_strlen($komentar) > 500) {
+            return redirect()->to('/restoran/' . $slug)->with('error', 'Komentar maksimal 500 karakter.');
+        }
+
+        $db = db_connect();
+        try {
+            $existing = $db->table('ulasan')
+                ->where('restoran_id', $restoran['id'])
+                ->where('pengguna_id', $penggunaId)
+                ->get()->getRowArray();
+
+            if ($existing) {
+                $db->table('ulasan')
+                    ->where('id', $existing['id'])
+                    ->update([
+                        'rating'     => $rating,
+                        'komentar'   => $komentar !== '' ? $komentar : null,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                $pesan = 'Ulasan Anda berhasil diperbarui!';
+            } else {
+                $db->table('ulasan')->insert([
+                    'restoran_id' => $restoran['id'],
+                    'pengguna_id' => $penggunaId,
+                    'rating'      => $rating,
+                    'komentar'    => $komentar !== '' ? $komentar : null,
+                ]);
+                $pesan = 'Terima kasih! Ulasan Anda berhasil ditambahkan.';
+            }
+
+            // Hitung ulang rating & jumlah ulasan di restoran
+            $stat = $db->table('ulasan')
+                ->select('COUNT(*) AS total, AVG(rating) AS rata')
+                ->where('restoran_id', $restoran['id'])
+                ->get()->getRowArray();
+            if ($stat && (int) $stat['total'] > 0) {
+                $db->table('restoran')
+                    ->where('id', $restoran['id'])
+                    ->update([
+                        'rating'        => round((float) $stat['rata'], 1),
+                        'jumlah_ulasan' => (int) $stat['total'],
+                    ]);
+            }
+
+            return redirect()->to('/restoran/' . $slug)->with('success', $pesan);
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal simpan ulasan: ' . $e->getMessage());
+            return redirect()->to('/restoran/' . $slug)->with('error', 'Gagal menyimpan ulasan.');
+        }
     }
 }
