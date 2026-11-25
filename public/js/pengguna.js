@@ -45,9 +45,8 @@
     return json;
   }
 
-  /* ---------- tampilan: gaya, bilah atas, dialog ---------- */
+  /* ---------- tampilan: gaya, dialog ---------- */
   var css = [
-    '.u-bar{position:fixed;top:10px;right:12px;z-index:60;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e4d8c3;border-radius:999px;padding:6px 8px 6px 14px;box-shadow:0 2px 10px #0002;font:14px system-ui,sans-serif;color:#2b2220}',
     '.u-btn{font:inherit;padding:6px 12px;border:1px solid #e4d8c3;background:#fff;border-radius:999px;cursor:pointer;color:#2b2220}',
     '.u-btn:hover{border-color:#6b1f2a}',
     '.u-utama{background:#6b1f2a;color:#fff;border-color:#6b1f2a}',
@@ -73,22 +72,10 @@
     setTimeout(function () { t.classList.remove('tampil'); }, 2600);
   }
 
-  function gambarBar() {
-    var b = $('#u-bar');
-    b.innerHTML = token
-      ? '<span>Halo, <b>' + h(saya) + '</b></span><button class="u-btn" data-u="keluar" type="button">Keluar</button>'
-      : '<span>Ingin menulis ulasan?</span><button class="u-btn u-utama" data-u="buka-masuk" type="button">Masuk / Daftar</button>';
-  }
-
   function pasangKerangka() {
     var gaya = document.createElement('style');
     gaya.textContent = css;
     document.head.appendChild(gaya);
-
-    var bar = document.createElement('div');
-    bar.id = 'u-bar';
-    bar.className = 'u-bar';
-    document.body.appendChild(bar);
 
     var dlg = document.createElement('dialog');
     dlg.id = 'u-dlg';
@@ -132,7 +119,6 @@
     saya = '';
     sessionStorage.removeItem(K_TOKEN);
     sessionStorage.removeItem(K_NAMA);
-    gambarBar();
     muatUlasan();
     if (umumkan !== false) toast('Kamu sudah keluar.');
   }
@@ -152,7 +138,6 @@
       sessionStorage.setItem(K_NAMA, saya);
       f.reset();
       $('#u-dlg').close();
-      gambarBar();
       toast('Selamat datang, ' + saya + '.');
       muatUlasan();
     } catch (e) {
@@ -238,7 +223,6 @@
   /* ---------- penghubung ---------- */
   function mulai() {
     pasangKerangka();
-    gambarBar();
     document.addEventListener('click', function (ev) {
       var el = ev.target.closest('[data-u]');
       if (!el) return;

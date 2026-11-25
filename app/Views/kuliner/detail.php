@@ -86,11 +86,6 @@ foreach ($menu as $m) {
     <div id="peta" class="peta"></div>
   </section>
 
-  <section class="panel" id="panel-ulasan" data-restoran-id="<?= (int) $r['id'] ?>">
-    <h2>Ulasan pengguna</h2>
-    <p class="catatan">Memuat ulasan...</p>
-  </section>
-
   <?php if (!empty($sekitar)): ?>
   <section class="panel sekitar">
     <h2>Restoran lain di sekitar</h2>

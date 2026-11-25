@@ -73,8 +73,8 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('error', 'Username harus 3-30 karakter (hanya huruf, angka, minus, atau garis bawah).');
         }
 
-        if (strlen($password) < 6) {
-            return redirect()->back()->withInput()->with('error', 'Password minimal 6 karakter.');
+        if (strlen($password) < 8) {
+            return redirect()->back()->withInput()->with('error', 'Password minimal 8 karakter.');
         }
 
         if ($password !== $konfirmasi) {
@@ -107,7 +107,7 @@ class Auth extends BaseController
             return redirect()->to('/')->with('success', 'Pendaftaran berhasil! Selamat datang, ' . $username . '.');
         } catch (\Throwable $e) {
             log_message('error', 'Daftar DB error: ' . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'Gagal mendaftar: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal mendaftar. Silakan coba lagi.');
         }
     }
 

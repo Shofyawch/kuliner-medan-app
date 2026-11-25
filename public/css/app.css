@@ -1,6 +1,7 @@
 :root{--marun:#7a1f2b;--marun-gelap:#5c1520;--emas:#c9962b;--krem:#faf5ec;--teks:#2b2523;--abu:#6b625d;--garis:#e9dfd0;--hijau:#2f6f3e}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--krem);color:var(--teks);line-height:1.5}
+body{margin:0;min-height:100dvh;display:flex;flex-direction:column;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--krem);color:var(--teks);line-height:1.5}
+.utama{flex:1}
 h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.2}
 a{color:inherit}
 .wadah{max-width:1080px;margin:0 auto;padding:0 16px}
@@ -43,8 +44,19 @@ a{color:inherit}
 .pagination{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;list-style:none;padding:0;margin:24px 0}
 .pagination a{display:block;padding:7px 12px;border:1px solid var(--garis);border-radius:8px;background:#fff;text-decoration:none}
 .pagination li.active a{background:var(--marun);color:#fff;border-color:var(--marun)}
-footer.dasar{margin-top:40px;padding:24px 0;background:var(--marun-gelap);color:#e7d6bd;font-size:13px}
+footer.dasar{margin-top:48px;padding:36px 0 22px;background:var(--marun-gelap);color:#e7d6bd;font-size:13.5px}
 footer.dasar p{margin:4px 0}
+.footer-grid{display:grid;grid-template-columns:1fr;gap:26px;padding-bottom:26px;border-bottom:1px solid rgba(255,255,255,.14)}
+@media (min-width:640px){.footer-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:900px){.footer-grid{grid-template-columns:1.5fr 1fr 1fr 1.15fr}}
+.footer-desk{margin-top:10px!important;color:#dfd0ba;line-height:1.6;max-width:34ch}
+.footer-kolom h3{margin:0 0 12px;font-size:15px;color:#fff;letter-spacing:.02em}
+.footer-kolom ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.footer-kolom a{color:#e7d6bd;text-decoration:none;transition:color .15s}
+.footer-kolom a:hover{color:var(--emas)}
+.footer-cta{display:inline-block;margin-top:4px;color:var(--emas)!important;font-weight:600}
+.footer-bawah{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 18px;padding-top:18px;font-size:12.5px;color:#cdbca4}
+.footer-catatan{opacity:.9}
 
 /* perapian beranda */
 .foto{aspect-ratio:16/9}
@@ -155,4 +167,37 @@ button.tombol:disabled{opacity:.6;cursor:wait}
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Halaman Informasi (FAQ, Kontak, Tentang, Ketentuan) */
+.halaman-info{padding-bottom:16px}
+.info-sub{color:var(--abu);margin:0 0 22px;max-width:65ch}
+.faq-daftar{display:flex;flex-direction:column;gap:10px}
+.faq-item{background:#fff;border:1px solid var(--garis);border-radius:12px;overflow:hidden;transition:border-color .15s}
+.faq-item[open]{border-color:var(--marun)}
+.faq-item summary{padding:15px 18px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";font-size:20px;line-height:1;color:var(--marun);font-weight:700;flex:none}
+.faq-item[open] summary::after{content:"\2212"}
+.faq-item summary:focus-visible{outline:2px solid var(--emas);outline-offset:-2px}
+.faq-isi{padding:0 18px 16px;color:var(--teks);border-top:1px solid #f4ecdf}
+.faq-isi p{margin:12px 0 0}
+.faq-isi a{color:var(--marun);font-weight:600}
+
+.kontak-grid{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:760px){.kontak-grid{grid-template-columns:1fr 1.2fr}}
+.kontak-daftar{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.kontak-daftar li{display:flex;flex-direction:column;gap:2px;padding-bottom:10px;border-bottom:1px solid #f4ecdf}
+.kontak-daftar li:last-child{border-bottom:0;padding-bottom:0}
+.kontak-daftar strong{font-size:13px;color:var(--abu);text-transform:uppercase;letter-spacing:.03em}
+.kontak-daftar a{color:var(--marun);font-weight:600;text-decoration:none}
+.kontak-daftar a:hover{text-decoration:underline}
+
+.form-kontak{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.grup-input label{display:block;font-size:13.5px;font-weight:600;margin-bottom:4px;color:var(--teks)}
+.grup-input input,.grup-input select,.grup-input textarea{width:100%;padding:10px 12px;border:1px solid var(--garis);border-radius:10px;background:#fff;font-family:inherit;font-size:14.5px;color:var(--teks)}
+.grup-input input:focus,.grup-input select:focus,.grup-input textarea:focus{outline:2px solid var(--emas);border-color:var(--marun)}
+.kontak-status{margin:4px 0 0;padding:10px 12px;border-radius:8px;background:#e8f5e9;color:#1b5e20;font-size:14px;font-weight:500}
+.daftar-polos{margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
+.halaman-info .panel h2{margin-top:18px;font-size:19px}
+.halaman-info .panel h2:first-child{margin-top:0}
 

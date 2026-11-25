@@ -26,15 +26,57 @@
   </div>
 </header>
 
-<?= $this->renderSection('konten') ?>
+<main class="utama">
+  <?= $this->renderSection('konten') ?>
+</main>
 
 <footer class="dasar">
   <div class="wadah">
-    <p>Harga dapat berbeda sewaktu-waktu. Status halal belum semuanya terverifikasi.</p>
-    <p>Peta &copy; kontributor OpenStreetMap.</p>
+    <div class="footer-grid">
+      <div class="footer-kolom">
+        <a class="merek" href="/">Kuliner <span>Khas</span> Medan</a>
+        <p class="footer-desk">Panduan kuliner autentik Kota Medan lengkap dengan peta lokasi, daftar menu, estimasi harga, status halal, dan ulasan pengunjung.</p>
+      </div>
+
+      <div class="footer-kolom">
+        <h3>Jelajahi</h3>
+        <ul>
+          <li><a href="/">Beranda</a></li>
+          <li><a href="/terdekat">Kuliner Terdekat</a></li>
+          <li><a href="/hotel">Penginapan</a></li>
+          <?php if (!session()->has('pengguna_id')): ?>
+            <li><a href="/login">Masuk / Daftar</a></li>
+          <?php endif; ?>
+        </ul>
+      </div>
+
+      <div class="footer-kolom">
+        <h3>Informasi</h3>
+        <ul>
+          <li><a href="/tentang">Tentang Kami</a></li>
+          <li><a href="/faq">FAQ (Tanya Jawab)</a></li>
+          <li><a href="/kontak">Hubungi Kami</a></li>
+          <li><a href="/ketentuan">Kebijakan &amp; Ketentuan</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-kolom">
+        <h3>Kontak</h3>
+        <ul class="footer-kontak">
+          <li>Medan, Sumatera Utara</li>
+          <li><a href="mailto:halo@kulinermedan.id">halo@kulinermedan.id</a></li>
+          <li>Senin – Minggu, 08.00 – 21.00 WIB</li>
+          <li><a href="/kontak" class="footer-cta">Kirim Pesan &rarr;</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bawah">
+      <p>&copy; <?= date('Y') ?> Kuliner Khas Medan. Seluruh hak cipta dilindungi.</p>
+      <p class="footer-catatan">Harga dapat berbeda sewaktu-waktu. Status halal belum semuanya terverifikasi. Peta &copy; kontributor OpenStreetMap.</p>
+    </div>
   </div>
 </footer>
 <?= $this->renderSection('skrip') ?>
-<script src="/js/pengguna.js" defer></script>
 </body>
 </html>
