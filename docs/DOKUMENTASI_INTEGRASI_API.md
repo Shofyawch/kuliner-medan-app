@@ -13,7 +13,7 @@ REST API kami dibangun menggunakan **CodeIgniter 4 (PHP)** dengan database **Pos
 * **Format Response:** JSON (Standard RESTful)
 * **Header Wajib:**
   ```http
-  X-API-KEY: 2fd919b37898dc69fef56b2f540317e87b88820aa082b97e6a38bc3ace94df91
+  X-API-KEY: ISI_API_KEY_DARI_TIM_KAMI
   Accept: application/json
   ```
 * **CORS:** Diaktifkan (`Access-Control-Allow-Origin: *`), dapat dipanggil langsung dari JavaScript browser (Fetch / Axios) maupun backend server PHP (cURL / file_get_contents).
@@ -181,7 +181,7 @@ $apiUrl = 'https://<URL_HOST_ANDA>/api/v1/restoran/terdekat?' . http_build_query
 $options = [
     'http' => [
         'method' => 'GET',
-        'header' => "X-API-KEY: 2fd919b37898dc69fef56b2f540317e87b88820aa082b97e6a38bc3ace94df91\r\n" .
+        'header' => "X-API-KEY: ISI_API_KEY_DARI_TIM_KAMI\r\n" .
                     "ngrok-skip-browser-warning: 1\r\n" .
                     "Accept: application/json\r\n",
         'timeout' => 8,
@@ -210,7 +210,7 @@ if ($response !== false) {
 
 ```javascript
 const BASE_KULINER_URL = 'https://<URL_HOST_ANDA>/api/v1';
-const API_KEY = '2fd919b37898dc69fef56b2f540317e87b88820aa082b97e6a38bc3ace94df91';
+const API_KEY = 'ISI_API_KEY_DARI_TIM_KAMI';
 
 // Mengambil kuliner terdekat dari titik GPS hotel
 async function getKulinerTerdekat(lat, lng) {
