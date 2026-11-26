@@ -72,6 +72,11 @@ class Kuliner extends BaseController
         $restoran = RatingWeb::tempel($model->paginate(20));
         $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'halal', 'urut']);
 
+        $totalTampil = $model->pager->getTotal();
+        $metaDeskripsi = $kategori
+            ? "Jelajahi {$totalTampil} tempat makan {$kategori} di Medan lengkap dengan menu, harga, status halal, dan peta lokasi."
+            : "Temukan {$totalTampil} restoran kuliner khas Medan lengkap dengan daftar menu, estimasi harga, status halal, peta lokasi, dan ulasan pengunjung.";
+
         return view('kuliner/index', [
             'restoran'        => $restoran,
             'pager'           => $model->pager,
@@ -83,6 +88,7 @@ class Kuliner extends BaseController
             'harga'           => $harga,
             'halal'           => $halal,
             'urut'            => $urut,
+            'metaDeskripsi'   => $metaDeskripsi,
         ]);
     }
 
@@ -149,14 +155,18 @@ class Kuliner extends BaseController
             }
         }
 
+        $lokasi = !empty($restoran['kecamatan']) ? ' di ' . $restoran['kecamatan'] . ', Medan' : ' di Medan';
+        $metaDeskripsi = $restoran['nama'] . ' (' . ($restoran['kategori_khas'] ?? 'Kuliner Medan') . ')' . $lokasi . ' — lihat daftar menu, estimasi harga, lokasi peta, dan ulasan pengunjung.';
+
         return view('kuliner/detail', [
-            'r'            => $restoran,
-            'menu'         => $menu,
-            'sekitar'      => $sekitar,
-            'hotelSekitar' => $hotelSekitar,
-            'ulasan'       => $ulasan,
-            'ulasanSaya'   => $ulasanSaya,
-            'judul'        => $restoran['nama'] . ' - Kuliner Khas Medan',
+            'r'             => $restoran,
+            'menu'          => $menu,
+            'sekitar'       => $sekitar,
+            'hotelSekitar'  => $hotelSekitar,
+            'ulasan'        => $ulasan,
+            'ulasanSaya'    => $ulasanSaya,
+            'judul'         => $restoran['nama'] . ' - Kuliner Khas Medan',
+            'metaDeskripsi' => $metaDeskripsi,
         ]);
     }
 

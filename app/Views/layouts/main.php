@@ -5,6 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= esc($judul ?? 'Kuliner Khas Medan') ?></title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="description" content="<?= esc($metaDeskripsi ?? 'Panduan kuliner autentik Kota Medan — menu, harga, peta lokasi, status halal, dan ulasan tempat makan terbaik.') ?>">
+<meta property="og:title" content="<?= esc($judul ?? 'Kuliner Khas Medan') ?>">
+<meta property="og:description" content="<?= esc($metaDeskripsi ?? 'Panduan kuliner autentik Kota Medan — menu, harga, peta lokasi, status halal, dan ulasan tempat makan terbaik.') ?>">
+<meta property="og:type" content="website">
+<meta property="og:url" content="<?= esc(current_url()) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

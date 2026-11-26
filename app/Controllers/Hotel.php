@@ -55,6 +55,7 @@ class Hotel extends BaseController
 
         return view('hotel/index', [
             'judul'           => 'Daftar Hotel & Penginapan di Medan',
+            'metaDeskripsi'   => 'Cari hotel dan penginapan nyaman di Kota Medan dengan filter kecamatan, sarapan, rating, serta rekomendasi kuliner terdekat.',
             'hotels'          => $hotels,
             'meta'            => $meta,
             'daftarKecamatan' => $daftarKecamatan,
@@ -91,8 +92,12 @@ class Hotel extends BaseController
             }
         }
 
+        $kec = !empty($hotel['kecamatan']) ? ' di ' . $hotel['kecamatan'] . ', Medan' : ' di Medan';
+        $metaDeskripsi = $hotel['nama'] . $kec . ' — informasi fasilitas, ulasan tamu, dan rekomendasi kuliner khas Medan terdekat.';
+
         return view('hotel/detail', [
             'judul'          => $hotel['nama'] . ' - Penginapan Medan',
+            'metaDeskripsi'  => $metaDeskripsi,
             'h'              => $hotel,
             'ulasan'         => $ulasan,
             'kulinerSekitar' => $kulinerSekitar,

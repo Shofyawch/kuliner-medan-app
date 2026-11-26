@@ -40,13 +40,15 @@ class Terdekat extends BaseController
         }
 
         return view('kuliner/terdekat', [
-            'patokan' => $this->patokan,
-            'pilihan' => $pilihan,
-            'radius'  => $radius,
-            'asal'    => $asal,
-            'lat'     => $lat,
-            'lng'     => $lng,
-            'hasil'   => $hasil,
+            'judul'         => 'Kuliner Terdekat dari Lokasimu — Kuliner Khas Medan',
+            'metaDeskripsi' => 'Temukan tempat makan dan restoran kuliner khas Medan terdekat dari lokasi GPS kamu atau titik populer di Kota Medan.',
+            'patokan'       => $this->patokan,
+            'pilihan'       => $pilihan,
+            'radius'        => $radius,
+            'asal'          => $asal,
+            'lat'           => $lat,
+            'lng'           => $lng,
+            'hasil'         => $hasil,
         ]);
     }
 }
