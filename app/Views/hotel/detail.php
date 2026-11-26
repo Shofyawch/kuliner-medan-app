@@ -17,12 +17,12 @@ $fmtJarak = static fn ($j) => $j < 1 ? round($j * 1000) . ' m' : number_format($
   <a class="kembali" href="/hotel">&larr; Semua penginapan</a>
 
   <?php if (session()->getFlashdata('success')): ?>
-    <div style="background:#e8f5e9;border:1px solid #c8e6c9;color:#2e7d32;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+    <div class="alert alert-sukses">
       <?= esc(session()->getFlashdata('success')) ?>
     </div>
   <?php endif; ?>
   <?php if (session()->getFlashdata('error')): ?>
-    <div style="background:#ffebee;border:1px solid #ffcdd2;color:#c62828;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+    <div class="alert alert-galat">
       <?= esc(session()->getFlashdata('error')) ?>
     </div>
   <?php endif; ?>

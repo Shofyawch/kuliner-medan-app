@@ -26,12 +26,12 @@ foreach ($menu as $m) {
   <a class="kembali" href="/">&larr; Semua restoran</a>
 
   <?php if (session()->getFlashdata('success')): ?>
-    <div style="background:#e8f5e9;border:1px solid #c8e6c9;color:#2e7d32;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+    <div class="alert alert-sukses">
       <?= esc(session()->getFlashdata('success')) ?>
     </div>
   <?php endif; ?>
   <?php if (session()->getFlashdata('error')): ?>
-    <div style="background:#ffebee;border:1px solid #ffcdd2;color:#c62828;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+    <div class="alert alert-galat">
       <?= esc(session()->getFlashdata('error')) ?>
     </div>
   <?php endif; ?>
@@ -39,7 +39,8 @@ foreach ($menu as $m) {
   <div class="detail-atas">
     <div class="foto-besar">
       <?php if ($foto): ?>
-        <img src="<?= esc($foto) ?>" alt="<?= esc($r['nama']) ?>">
+        <img src="<?= esc($foto) ?>" alt="<?= esc($r['nama']) ?>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <span class="inisial" style="display:none;"><?= esc(mb_strtoupper(mb_substr($r['nama'], 0, 1))) ?></span>
       <?php else: ?>
         <span class="inisial"><?= esc(mb_strtoupper(mb_substr($r['nama'], 0, 1))) ?></span>
       <?php endif; ?>
@@ -52,7 +53,7 @@ foreach ($menu as $m) {
       <p><?= esc($r['alamat']) ?></p>
       <p>
         <?php if ($max > 0): ?><span class="label">Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
-        <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : '') ?>"><?= esc($halal) ?></span><?php endif; ?>
+        <?php if ($halal !== ''): ?><span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : 'halal') ?>"><?= esc($halal) ?></span><?php endif; ?>
       </p>
       <?php if (!empty($r['deskripsi'])): ?><p><?= esc($r['deskripsi']) ?></p><?php endif; ?>
       <?php if (!empty($r['link_maps']) && preg_match('#^https?://#i', $r['link_maps'])): ?>

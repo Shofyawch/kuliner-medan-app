@@ -23,6 +23,7 @@ $linkPage = static function (int $p) use ($param): string {
       <input type="text" name="q" placeholder="Cari nama hotel..." value="<?= esc($cari ?? '') ?>" aria-label="Cari nama hotel">
       <?php if ($kecamatan): ?><input type="hidden" name="kecamatan" value="<?= esc($kecamatan) ?>"><?php endif; ?>
       <?php if ($sarapan): ?><input type="hidden" name="sarapan" value="<?= esc($sarapan) ?>"><?php endif; ?>
+      <?php if ($ratingMin): ?><input type="hidden" name="rating_min" value="<?= esc($ratingMin) ?>"><?php endif; ?>
       <button type="submit">Cari</button>
     </form>
     <a class="tautan" href="/">Kembali ke daftar kuliner &rarr;</a>

@@ -74,7 +74,8 @@ $linkKat = static function (?string $k) use ($param): string {
     <a class="kartu" href="/restoran/<?= esc($r['slug']) ?>">
       <div class="foto">
         <?php if ($foto): ?>
-          <img src="<?= esc($foto) ?>" alt="<?= esc($r['nama']) ?>" loading="lazy">
+          <img src="<?= esc($foto) ?>" alt="<?= esc($r['nama']) ?>" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <span class="inisial" style="display:none;"><?= esc(mb_strtoupper(mb_substr($r['nama'], 0, 1))) ?></span>
         <?php else: ?>
           <span class="inisial"><?= esc(mb_strtoupper(mb_substr($r['nama'], 0, 1))) ?></span>
         <?php endif; ?>
@@ -90,7 +91,7 @@ $linkKat = static function (?string $k) use ($param): string {
         </div>
         <div>
           <?php if ($halal !== ''): ?>
-            <span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : '') ?>"><?= esc($halal) ?></span>
+            <span class="label <?= stripos($halal, 'belum') !== false ? 'belum' : (stripos($halal, 'non') !== false ? 'nonhalal' : 'halal') ?>"><?= esc($halal) ?></span>
           <?php endif; ?>
         </div>
       </div>

@@ -9,12 +9,12 @@
     </p>
 
     <?php if (session()->getFlashdata('error')): ?>
-      <div style="background:#ffebee;border:1px solid #ffcdd2;color:#c62828;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:14px;">
+      <div class="alert alert-galat">
         <?= esc(session()->getFlashdata('error')) ?>
       </div>
     <?php endif; ?>
     <?php if (session()->getFlashdata('success')): ?>
-      <div style="background:#e8f5e9;border:1px solid #c8e6c9;color:#2e7d32;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:14px;">
+      <div class="alert alert-sukses">
         <?= esc(session()->getFlashdata('success')) ?>
       </div>
     <?php endif; ?>

@@ -9,7 +9,7 @@
     </p>
 
     <?php if (session()->getFlashdata('error')): ?>
-      <div style="background:#ffebee;border:1px solid #ffcdd2;color:#c62828;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:14px;">
+      <div class="alert alert-galat">
         <?= esc(session()->getFlashdata('error')) ?>
       </div>
     <?php endif; ?>
@@ -24,7 +24,7 @@
 
       <div style="margin-bottom: 16px;">
         <label for="password" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Password</label>
-        <input type="password" id="password" name="password" placeholder="Minimal 6 karakter" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" required>
+        <input type="password" id="password" name="password" placeholder="Minimal 8 karakter" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" minlength="8" required>
       </div>
 
       <div style="margin-bottom: 22px;">
