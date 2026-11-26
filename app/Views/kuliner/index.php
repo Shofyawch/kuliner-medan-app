@@ -514,11 +514,30 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
       <option value="sedang" <?= $harga === 'sedang' ? 'selected' : '' ?>>Sedang (Rp 25&ndash;60 rb)</option>
       <option value="mahal" <?= $harga === 'mahal' ? 'selected' : '' ?>>Mahal (di atas Rp 60 rb)</option>
     </select>
-    <select name="urut" form="form-cari" aria-label="Urutkan" onchange="this.form.submit()">
-      <option value="">Paling cocok</option>
-      <option value="rating" <?= $urut === 'rating' ? 'selected' : '' ?>>Rating Google tertinggi</option>
-      <option value="murah" <?= $urut === 'murah' ? 'selected' : '' ?>>Harga termurah</option>
-    </select>
+    <?php
+$urutDipilih = array_values(array_intersect((array) ($urut ?? []), ['rating', 'harga']));
+$labelUrut = [
+    'rating' => 'Rating Google tertinggi',
+    'harga'  => 'Harga termurah',
+];
+$teksUrut = match (count($urutDipilih)) {
+    0       => 'Paling cocok',
+    1       => $labelUrut[$urutDipilih[0]],
+    default => count($urutDipilih) . ' urutan dipilih',
+};
+?>
+<details class="multi" id="urut-multi">
+  <summary><?= esc($teksUrut) ?></summary>
+  <div class="multi-isi">
+    <?php foreach ($labelUrut as $nilai => $teks): ?>
+      <label>
+        <input type="checkbox" name="urut[]" value="<?= esc($nilai) ?>"
+               <?= in_array($nilai, $urutDipilih, true) ? 'checked' : '' ?>>
+        <?= esc($teks) ?>
+      </label>
+    <?php endforeach; ?>
+  </div>
+</details>
     <?php if ($aktifFilter): ?><a href="/#pilih">Atur ulang</a><?php endif; ?>
   </div>
 
