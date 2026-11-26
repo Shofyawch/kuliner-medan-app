@@ -9,7 +9,6 @@ $routes->get('terdekat', 'Terdekat::index');
 $routes->get('hotel', 'Hotel::index');
 $routes->get('hotel/(:num)', 'Hotel::detail/$1');
 $routes->post('hotel/(:num)/ulasan', 'Hotel::kirimUlasan/$1');
-$routes->get('hotel/(:num)/ulasan/(:num)/hapus', 'Hotel::hapusUlasan/$1/$2'); // noop if unused
 $routes->post('hotel/(:num)/ulasan/(:num)/hapus', 'Hotel::hapusUlasan/$1/$2');
 
 // ---- Halaman Informasi & Bantuan ----
@@ -23,7 +22,7 @@ $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::prosesLogin');
 $routes->get('daftar', 'Auth::daftar');
 $routes->post('daftar', 'Auth::prosesDaftar');
-$routes->get('logout', 'Auth::logout');
+$routes->post('logout', 'Auth::logout');
 
 // ---- Kirim Ulasan Restoran Web ----
 $routes->post('restoran/(:segment)/ulasan', 'Kuliner::simpanUlasan/$1');
@@ -58,9 +57,6 @@ $routes->group('api/v1', ['filter' => 'apiauth:admin', 'namespace' => 'App\Contr
 $routes->group('api/v1', ['namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
     $routes->post('auth/daftar', 'Auth::daftar');
     $routes->get('restoran/(:num)/ulasan', 'Ulasan::daftar/$1');
-});
-
-$routes->group('api/v1', ['filter' => 'apiauth', 'namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
 });
 
 $routes->group('api/v1', ['filter' => 'apiauth:login', 'namespace' => 'App\Controllers\Api\V1'], static function ($routes) {

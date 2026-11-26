@@ -101,6 +101,11 @@ class Hotel extends BaseController
 
     public function kirimUlasan(int $id)
     {
+        $penggunaId = session()->get('pengguna_id');
+        if (!$penggunaId) {
+            return redirect()->to('/login')->with('error', 'Silakan masuk terlebih dahulu untuk menulis ulasan hotel.');
+        }
+
         $rating = (int) $this->request->getPost('rating');
         $judul  = trim((string) $this->request->getPost('judul'));
         $isi    = trim((string) $this->request->getPost('isi'));
@@ -110,7 +115,7 @@ class Hotel extends BaseController
                 ->with('error', 'Semua kolom ulasan wajib diisi (rating 1-5).');
         }
 
-        $hasil = $this->hotelService->createReview($id, $rating, $judul, $isi);
+        $hasil = $this->hotelService->createReview($id, $rating, $judul, $isi, (int) $penggunaId);
 
         if ($hasil && ($hasil['status'] ?? '') === 'ok') {
             return redirect()->to('/hotel/' . $id)
@@ -123,6 +128,10 @@ class Hotel extends BaseController
 
     public function hapusUlasan(int $hotelId, int $reviewId)
     {
+        if (!session()->has('pengguna_id')) {
+            return redirect()->to('/login')->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
         $hasil = $this->hotelService->deleteReview($reviewId, $hotelId);
         if ($hasil && ($hasil['status'] ?? '') === 'ok') {
             return redirect()->to('/hotel/' . $hotelId)

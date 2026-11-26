@@ -2,38 +2,36 @@
 (function () {
   'use strict';
 
-  var API = '/api/v1';
-  var K_TOKEN = 'pub_token';
-  var K_NAMA = 'pub_nama';
-  var token = sessionStorage.getItem(K_TOKEN) || '';
-  var saya = sessionStorage.getItem(K_NAMA) || '';
-  var modeDaftar = false;
+  const API = '/api/v1';
+  const K_TOKEN = 'pub_token';
+  const K_NAMA = 'pub_nama';
+  let token = sessionStorage.getItem(K_TOKEN) || '';
+  let saya = sessionStorage.getItem(K_NAMA) || '';
+  let modeDaftar = false;
 
-  function h(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-  function $(s) { return document.querySelector(s); }
-  function pesan(e) {
-    var p = e && e.pesan ? e.pesan : 'Terjadi kesalahan.';
+  const h = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+  const $ = (s) => document.querySelector(s);
+  const pesan = (e) => {
+    let p = e && e.pesan ? e.pesan : 'Terjadi kesalahan.';
     if (e && e.errors) {
-      p += '\n' + Object.keys(e.errors).map(function (k) { return '- ' + k + ': ' + e.errors[k]; }).join('\n');
+      p += '\n' + Object.keys(e.errors).map((k) => '- ' + k + ': ' + e.errors[k]).join('\n');
     }
     return p;
-  }
+  };
 
-  async function api(metode, path, body) {
-    var opt = { method: metode, headers: { 'Content-Type': 'application/json' } };
+  const api = async (metode, path, body) => {
+    const opt = { method: metode, headers: { 'Content-Type': 'application/json' } };
     if (token) opt.headers.Authorization = 'Bearer ' + token;
     if (body !== undefined) opt.body = JSON.stringify(body);
-    var res;
+    let res;
     try {
       res = await fetch(API + path, opt);
     } catch (e) {
       throw { kode: 0, pesan: 'Tidak bisa menghubungi server.' };
     }
-    var json = null;
+    let json = null;
     try { json = await res.json(); } catch (e) { /* bukan JSON */ }
     if (res.status === 401 && token) {
       keluar(false);
@@ -43,10 +41,10 @@
       throw { kode: res.status, pesan: (json && json.message) || 'Terjadi kesalahan.', errors: json && json.errors };
     }
     return json;
-  }
+  };
 
   /* ---------- tampilan: gaya, dialog ---------- */
-  var css = [
+  const css = [
     '.u-btn{font:inherit;padding:6px 12px;border:1px solid #e4d8c3;background:#fff;border-radius:999px;cursor:pointer;color:#2b2220}',
     '.u-btn:hover{border-color:#6b1f2a}',
     '.u-utama{background:#6b1f2a;color:#fff;border-color:#6b1f2a}',
@@ -65,19 +63,19 @@
     '#u-toast.tampil{opacity:1}'
   ].join('\n');
 
-  function toast(teks) {
-    var t = $('#u-toast');
+  const toast = (teks) => {
+    const t = $('#u-toast');
     t.textContent = teks;
     t.classList.add('tampil');
-    setTimeout(function () { t.classList.remove('tampil'); }, 2600);
-  }
+    setTimeout(() => t.classList.remove('tampil'), 2600);
+  };
 
-  function pasangKerangka() {
-    var gaya = document.createElement('style');
+  const pasangKerangka = () => {
+    const gaya = document.createElement('style');
     gaya.textContent = css;
     document.head.appendChild(gaya);
 
-    var dlg = document.createElement('dialog');
+    const dlg = document.createElement('dialog');
     dlg.id = 'u-dlg';
     dlg.className = 'u-dlg';
     dlg.innerHTML =
@@ -93,13 +91,13 @@
       '<button class="u-tautan" id="u-ganti" data-u="ganti" type="button">Daftar</button></p>';
     document.body.appendChild(dlg);
 
-    var t = document.createElement('div');
+    const t = document.createElement('div');
     t.id = 'u-toast';
     t.setAttribute('role', 'status');
     document.body.appendChild(t);
-  }
+  };
 
-  function aturMode(daftar) {
+  const aturMode = (daftar) => {
     modeDaftar = daftar;
     $('#u-judul').textContent = daftar ? 'Daftar akun baru' : 'Masuk';
     $('#u-kirim').textContent = daftar ? 'Daftar' : 'Masuk';
@@ -107,31 +105,31 @@
     $('#u-ganti').textContent = daftar ? 'Masuk' : 'Daftar';
     $('#u-pass').autocomplete = daftar ? 'new-password' : 'current-password';
     $('#u-galat').textContent = '';
-  }
-  function bukaDialog(daftar) {
+  };
+  const bukaDialog = (daftar) => {
     aturMode(!!daftar);
     $('#u-dlg').showModal();
-  }
+  };
 
   /* ---------- masuk dan keluar ---------- */
-  function keluar(umumkan) {
+  const keluar = (umumkan) => {
     token = '';
     saya = '';
     sessionStorage.removeItem(K_TOKEN);
     sessionStorage.removeItem(K_NAMA);
     muatUlasan();
     if (umumkan !== false) toast('Kamu sudah keluar.');
-  }
+  };
 
-  async function prosesMasuk(ev) {
+  const prosesMasuk = async (ev) => {
     ev.preventDefault();
-    var f = ev.target;
-    var u = f.elements.username.value.trim();
-    var p = f.elements.password.value;
+    const f = ev.target;
+    const u = f.elements.username.value.trim();
+    const p = f.elements.password.value;
     $('#u-galat').textContent = '';
     try {
       if (modeDaftar) await api('POST', '/auth/daftar', { username: u, password: p });
-      var r = await api('POST', '/auth/login', { username: u, password: p });
+      const r = await api('POST', '/auth/login', { username: u, password: p });
       token = r.data.token;
       saya = r.data.username;
       sessionStorage.setItem(K_TOKEN, token);
@@ -143,31 +141,30 @@
     } catch (e) {
       $('#u-galat').textContent = pesan(e);
     }
-  }
+  };
 
   /* ---------- ulasan di halaman detail restoran ---------- */
-  async function muatUlasan() {
-    var kotak = $('#panel-ulasan');
+  const muatUlasan = async () => {
+    const kotak = $('#panel-ulasan');
     if (!kotak) return;
-    var id = kotak.getAttribute('data-restoran-id');
+    const id = kotak.getAttribute('data-restoran-id');
     try {
-      var r = await api('GET', '/restoran/' + encodeURIComponent(id) + '/ulasan?per_page=50');
-      var milik = saya ? (r.data.filter(function (u) { return u.pengguna === saya; })[0] || null) : null;
-      var rata = r.meta.rata_rata_rating;
+      const r = await api('GET', '/restoran/' + encodeURIComponent(id) + '/ulasan?per_page=50');
+      const milik = saya ? (r.data.filter((u) => u.pengguna === saya)[0] || null) : null;
+      const rata = r.meta.rata_rata_rating;
 
-      var daftar = r.data.map(function (u) {
-        return '<div class="u-item"><span class="u-bintang">' + '&#9733;'.repeat(u.rating) + '&#9734;'.repeat(5 - u.rating) +
-          '</span> <b>' + h(u.pengguna) + '</b> <small>' + h(String(u.diubah || u.dibuat).slice(0, 10)) + '</small>' +
-          (u.komentar ? '<div>' + h(u.komentar) + '</div>' : '') + '</div>';
-      }).join('') || '<p class="catatan">Belum ada ulasan. Jadilah yang pertama!</p>';
+      const daftar = r.data.map((u) =>
+        '<div class="u-item"><span class="u-bintang">' + '&#9733;'.repeat(u.rating) + '&#9734;'.repeat(5 - u.rating) +
+        '</span> <b>' + h(u.pengguna) + '</b> <small>' + h(String(u.diubah || u.dibuat).slice(0, 10)) + '</small>' +
+        (u.komentar ? '<div>' + h(u.komentar) + '</div>' : '') + '</div>'
+      ).join('') || '<p class="catatan">Belum ada ulasan. Jadilah yang pertama!</p>';
 
-      var opsi = function (n) {
-        return [5, 4, 3, 2, 1].map(function (x) {
-          return '<option value="' + x + '"' + (x === n ? ' selected' : '') + '>' + x + ' bintang</option>';
-        }).join('');
-      };
+      const opsi = (n) =>
+        [5, 4, 3, 2, 1].map((x) =>
+          '<option value="' + x + '"' + (x === n ? ' selected' : '') + '>' + x + ' bintang</option>'
+        ).join('');
 
-      var bawah = token
+      const bawah = token
         ? '<h3>' + (milik ? 'Ulasanmu' : 'Tulis ulasan') + '</h3>' +
           '<form id="u-form-ulasan" data-id="' + h(id) + '" data-ulasan="' + (milik ? h(milik.id) : '') + '" data-versi="' + (milik ? h(milik.versi) : '') + '">' +
           '<label>Rating</label><select name="rating">' + opsi(milik ? milik.rating : 5) + '</select>' +
@@ -187,12 +184,12 @@
     } catch (e) {
       kotak.innerHTML = '<h2>Ulasan pengguna</h2><p class="u-galat">' + h(pesan(e)) + '</p>';
     }
-  }
+  };
 
-  async function kirimUlasan(ev) {
+  const kirimUlasan = async (ev) => {
     ev.preventDefault();
-    var f = ev.target;
-    var body = { rating: Number(f.elements.rating.value), komentar: f.elements.komentar.value };
+    const f = ev.target;
+    const body = { rating: Number(f.elements.rating.value), komentar: f.elements.komentar.value };
     try {
       if (f.getAttribute('data-ulasan')) {
         body.versi = Number(f.getAttribute('data-versi'));
@@ -203,13 +200,13 @@
       toast('Ulasan tersimpan.');
       muatUlasan();
     } catch (e) {
-      var g = $('#u-galat-ulasan');
+      const g = $('#u-galat-ulasan');
       if (g) g.textContent = pesan(e) + (e.kode === 409 ? '\nMuat ulang halaman, lalu coba lagi.' : '');
     }
-  }
+  };
 
-  async function hapusUlasan() {
-    var f = $('#u-form-ulasan');
+  const hapusUlasan = async () => {
+    const f = $('#u-form-ulasan');
     if (!f || !f.getAttribute('data-ulasan') || !confirm('Hapus ulasanmu?')) return;
     try {
       await api('DELETE', '/ulasan/' + f.getAttribute('data-ulasan'));
@@ -218,27 +215,27 @@
     } catch (e) {
       toast(pesan(e));
     }
-  }
+  };
 
   /* ---------- penghubung ---------- */
-  function mulai() {
+  const mulai = () => {
     pasangKerangka();
-    document.addEventListener('click', function (ev) {
-      var el = ev.target.closest('[data-u]');
+    document.addEventListener('click', (ev) => {
+      const el = ev.target.closest('[data-u]');
       if (!el) return;
-      var a = el.getAttribute('data-u');
+      const a = el.getAttribute('data-u');
       if (a === 'buka-masuk') bukaDialog(false);
       else if (a === 'keluar') keluar(true);
       else if (a === 'tutup') $('#u-dlg').close();
       else if (a === 'ganti') aturMode(!modeDaftar);
       else if (a === 'hapus-ulasan') hapusUlasan();
     });
-    document.addEventListener('submit', function (ev) {
+    document.addEventListener('submit', (ev) => {
       if (ev.target.id === 'u-form-masuk') prosesMasuk(ev);
       else if (ev.target.id === 'u-form-ulasan') kirimUlasan(ev);
     });
     muatUlasan();
-  }
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mulai);
   else mulai();

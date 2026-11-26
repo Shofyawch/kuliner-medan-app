@@ -18,7 +18,10 @@
       <a href="/hotel" class="<?= str_starts_with($aktif, 'hotel') ? 'aktif' : '' ?>">Penginapan</a>
       <?php if (session()->has('pengguna_id')): ?>
         <span style="color:var(--emas);margin-left:16px;font-size:14px;">Halo, <b><?= esc(session()->get('username')) ?></b></span>
-        <a href="/logout" style="color:#f8d7da;margin-left:10px;" title="Keluar dari akun">Keluar</a>
+        <form method="post" action="/logout" style="display:inline;margin-left:10px;">
+          <?= csrf_field() ?>
+          <button type="submit" style="background:none;border:none;color:#f8d7da;cursor:pointer;font:inherit;padding:0;text-decoration:underline;" title="Keluar dari akun">Keluar</button>
+        </form>
       <?php else: ?>
         <a href="/login" class="<?= $aktif === 'login' ? 'aktif' : '' ?>" style="margin-left:16px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:4px 12px;">Masuk</a>
       <?php endif; ?>

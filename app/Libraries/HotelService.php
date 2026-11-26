@@ -75,7 +75,7 @@ class HotelService
                     'Content-Type'               => 'application/json',
                 ],
                 'http_errors' => false,
-                'verify'      => false,
+                'verify'      => (bool) env('HOTEL_API_VERIFY', true),
             ]);
 
             $options = [];
@@ -235,7 +235,7 @@ class HotelService
     /**
      * Kirim ulasan baru ke server Singgah Medan
      */
-    public function createReview(int $hotelId, int $rating, string $judul, string $isi, int $userId = 2): ?array
+    public function createReview(int $hotelId, int $rating, string $judul, string $isi, int $userId): ?array
     {
         $res = $this->request('reviews', 'POST', [], [
             'hotel_id' => $hotelId,
