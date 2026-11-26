@@ -1151,6 +1151,86 @@
           }
         }
       ]
+    },
+    {
+      "name": "Log Integrasi",
+      "item": [
+        {
+          "name": "Pengguna biasa membuka log integrasi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', function () { pm.response.to.have.status(403); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user}}"
+              }
+            ],
+            "url": "{{base_url}}/log-integrasi"
+          }
+        },
+        {
+          "name": "Admin melihat semua log integrasi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); pm.expect(j.data).to.be.an('array'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/log-integrasi"
+          }
+        },
+        {
+          "name": "Admin filter log keluar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Format JSON status/message atau data', function () { const j = pm.response.json(); pm.expect(j).to.have.property('status'); pm.expect(j.data).to.be.an('array'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": "{{base_url}}/log-integrasi?arah=keluar&per_page=10"
+          }
+        }
+      ]
     }
   ],
   "variable": [
