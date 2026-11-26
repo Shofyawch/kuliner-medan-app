@@ -71,6 +71,7 @@ $routes->group('api/v1', ['filter' => 'apiauth:admin', 'namespace' => 'App\Contr
     $routes->get('hotel', 'HotelUlasan::daftarHotel');
     $routes->get('hotel/ulasan', 'HotelUlasan::index');
     $routes->delete('hotel/ulasan/(:num)', 'HotelUlasan::delete/$1');
+    $routes->get('log-integrasi', 'LogIntegrasiApi::index');
 });
 
 // ---- API v1: preflight CORS dan alamat yang tidak dikenal (selalu paling bawah) ----

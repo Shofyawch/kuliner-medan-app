@@ -133,6 +133,7 @@
       <button class="aktif" data-aksi="tab" data-nama="restoran">Restoran</button>
       <button data-aksi="tab" data-nama="ulasan">Ulasan Restoran</button>
       <button data-aksi="tab" data-nama="hotel-ulasan">Ulasan Penginapan</button>
+      <button data-aksi="tab" data-nama="log-integrasi">Log Integrasi</button>
     </nav>
 
     <div id="tab-restoran">
@@ -171,6 +172,25 @@
         </table>
       </div>
       <div id="pg-hotel-ulasan" class="pager"></div>
+    </div>
+
+    <div id="tab-log-integrasi" hidden>
+      <div class="baris">
+        <select id="filter-arah" aria-label="Filter arah integrasi" style="max-width:240px">
+          <option value="">Semua arah (masuk &amp; keluar)</option>
+          <option value="masuk">Masuk (ke API kita)</option>
+          <option value="keluar">Keluar (ke Singgah Medan)</option>
+        </select>
+        <button type="button" data-aksi="log-muat">Muat ulang</button>
+      </div>
+      <p id="info-log-integrasi" class="info"></p>
+      <div class="gulir">
+        <table>
+          <thead><tr><th>Arah</th><th>Metode &amp; Endpoint</th><th>Status</th><th>Data &amp; Durasi</th><th>Waktu</th></tr></thead>
+          <tbody id="tb-log-integrasi"></tbody>
+        </table>
+      </div>
+      <div id="pg-log-integrasi" class="pager"></div>
     </div>
   </section>
 </main>
@@ -238,7 +258,7 @@ const API = '/api/v1';
 const $ = (s) => document.querySelector(s);
 const token = <?= json_encode($token, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 const urlFoto = (p) => (/^https?:/i.test(p) ? p : '/' + p.replace(/^\/+/, ''));
-const st = { restoran: { page: 1, total_pages: 1 }, ulasan: { page: 1, total_pages: 1 }, 'hotel-ulasan': { page: 1, total_pages: 1, hotelLoaded: false }, menu: [], menuRestoran: null };
+const st = { restoran: { page: 1, total_pages: 1 }, ulasan: { page: 1, total_pages: 1 }, 'hotel-ulasan': { page: 1, total_pages: 1, hotelLoaded: false }, 'log-integrasi': { page: 1, total_pages: 1 }, menu: [], menuRestoran: null };
 
 function h(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -572,6 +592,35 @@ async function hapusHotelUlasan(id, hotelId) {
   }
 }
 
+/* ---------- log integrasi ---------- */
+async function muatLogIntegrasi() {
+  const arah = $('#filter-arah').value;
+  const qs = 'per_page=20&page=' + st['log-integrasi'].page + (arah ? '&arah=' + encodeURIComponent(arah) : '');
+  $('#tb-log-integrasi').innerHTML = '<tr><td colspan="5">Memuat log integrasi...</td></tr>';
+  try {
+    const r = await api('GET', '/log-integrasi?' + qs);
+    st['log-integrasi'].total_pages = r.meta.total_pages || 1;
+    $('#info-log-integrasi').textContent = r.meta.total + ' catatan pertukaran data';
+    $('#tb-log-integrasi').innerHTML = r.data.map((x) => {
+      const ok = x.status_code && x.status_code >= 200 && x.status_code < 300;
+      const warnaArah = x.arah === 'keluar' ? 'background:#e8f5e9;color:#245731' : 'background:#eef2ff;color:#1e40af';
+      const warnaSt = ok ? 'color:#245731;font-weight:600' : 'color:var(--bahaya);font-weight:600';
+      return `
+      <tr>
+        <td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;${warnaArah}">${h(x.arah)}</span></td>
+        <td><b>${h(x.metode)}</b> ${h(x.endpoint)}${x.parameter ? `<br><small>${h(x.parameter)}</small>` : ''}${x.keterangan ? `<br><small style="color:var(--bahaya)">${h(x.keterangan)}</small>` : ''}</td>
+        <td style="${warnaSt}">${h(x.status_code ?? '-')}</td>
+        <td>${x.jumlah_data != null ? h(x.jumlah_data) + ' data' : '-'}<br><small>${x.durasi_ms != null ? h(x.durasi_ms) + ' ms' : ''}</small></td>
+        <td><small>${h(x.dibuat)}</small></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5">Belum ada catatan log integrasi.</td></tr>';
+    gambarPager('log-integrasi');
+  } catch (e) {
+    $('#tb-log-integrasi').innerHTML = `<tr><td colspan="5" class="galat">${h(pesanGalat(e))}</td></tr>`;
+    toast(pesanGalat(e));
+  }
+}
+
 /* ---------- penghubung klik ---------- */
 const aksi = {
   tab: (d) => {
@@ -579,8 +628,10 @@ const aksi = {
     $('#tab-restoran').hidden = d.nama !== 'restoran';
     $('#tab-ulasan').hidden = d.nama !== 'ulasan';
     $('#tab-hotel-ulasan').hidden = d.nama !== 'hotel-ulasan';
+    $('#tab-log-integrasi').hidden = d.nama !== 'log-integrasi';
     if (d.nama === 'ulasan') muatUlasan();
     else if (d.nama === 'hotel-ulasan') muatHotelUlasan();
+    else if (d.nama === 'log-integrasi') muatLogIntegrasi();
     else muatRestoran();
   },
   tambah: () => bukaFormRestoran(null),
@@ -593,11 +644,13 @@ const aksi = {
   'ulasan-hapus': (d) => hapusUlasan(d.id),
   'hotel-ulasan-hapus': (d) => hapusHotelUlasan(d.id, d.hotelId),
   'hotel-muat': () => muatHotelUlasan(),
+  'log-muat': () => muatLogIntegrasi(),
   hal: (d) => {
     st[d.tab].page = Math.max(1, Number(d.ke));
     if (d.tab === 'restoran') muatRestoran();
     else if (d.tab === 'ulasan') muatUlasan();
-    else muatHotelUlasan();
+    else if (d.tab === 'hotel-ulasan') muatHotelUlasan();
+    else muatLogIntegrasi();
   },
   tutup: (d) => document.getElementById(d.dlg).close(),
 };
@@ -610,6 +663,10 @@ document.addEventListener('click', (ev) => {
 $('#filter-hotel').addEventListener('change', () => {
   st['hotel-ulasan'].page = 1;
   muatHotelUlasan();
+});
+$('#filter-arah').addEventListener('change', () => {
+  st['log-integrasi'].page = 1;
+  muatLogIntegrasi();
 });
 $('#f-cari').addEventListener('submit', (ev) => {
   ev.preventDefault();
