@@ -65,6 +65,12 @@ class HotelService
             $url .= '?' . http_build_query($params);
         }
 
+        $mulai      = microtime(true);
+        $statusCode = null;
+        $jumlahData = null;
+        $keterangan = null;
+        $paramTeks  = $params !== [] ? http_build_query($params) : null;
+
         try {
             $client = \Config\Services::curlrequest([
                 'timeout'     => $this->timeout,
@@ -83,20 +89,41 @@ class HotelService
                 $options['json'] = $body;
             }
 
-            $response = $client->request($method, $url, $options);
+            $response   = $client->request($method, $url, $options);
             $statusCode = $response->getStatusCode();
-            $content = $response->getBody();
+            $content    = $response->getBody();
 
             if ($statusCode >= 200 && $statusCode < 300) {
                 $data = json_decode($content, true);
-                return is_array($data) ? $data : null;
+                if (is_array($data)) {
+                    if (array_key_exists('data', $data)) {
+                        $d = $data['data'];
+                        $jumlahData = is_array($d) ? (array_is_list($d) ? count($d) : 1) : ($d !== null ? 1 : 0);
+                    }
+                    return $data;
+                }
+                return null;
             }
 
-            log_message('error', "Hotel API [{$method} {$url}] status {$statusCode}: " . substr($content, 0, 300));
+            $keterangan = 'HTTP ' . $statusCode . ': ' . substr((string) $content, 0, 200);
+            log_message('error', "Hotel API [{$method} {$url}] status {$statusCode}: " . substr((string) $content, 0, 300));
             return null;
         } catch (Throwable $e) {
+            $keterangan = $e->getMessage();
             log_message('error', "Hotel API connection error [{$url}]: " . $e->getMessage());
             return null;
+        } finally {
+            $durasiMs = (int) round((microtime(true) - $mulai) * 1000);
+            LogIntegrasi::catat(
+                'keluar',
+                '/' . ltrim($endpoint, '/'),
+                $method,
+                $paramTeks,
+                $statusCode,
+                $jumlahData,
+                $durasiMs,
+                $keterangan
+            );
         }
     }
 

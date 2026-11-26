@@ -28,6 +28,7 @@ class Filters extends BaseFilters
         'ratelimit'     => \App\Filters\RateLimit::class,
         'apiauth'       => \App\Filters\ApiAuth::class,
         'apikey'        => \App\Filters\ApiKey::class,
+        'logapi'        => \App\Filters\LogApiMasuk::class,
         'csrf'          => CSRF::class,
         'toolbar'       => DebugToolbar::class,
         'honeypot'      => Honeypot::class,
@@ -112,5 +113,6 @@ class Filters extends BaseFilters
     public array $filters = [
         'cors'      => ['before' => ['api/*'], 'after' => ['api/*']],
         'ratelimit' => ['before' => ['api/*']],
+        'logapi'    => ['before' => ['api/*'], 'after' => ['api/*']],
     ];
 }
