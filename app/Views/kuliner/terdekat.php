@@ -122,14 +122,23 @@ document.getElementById('gps').addEventListener('click', function () {
 var asal = <?= json_encode(['lat' => (float) $lat, 'lng' => (float) $lng, 'nama' => $asal, 'radius' => (float) $radius], $f) ?>;
 var data = <?= json_encode(array_map(static fn ($r) => [
     'nama' => $r['nama'], 'slug' => $r['slug'], 'kategori_khas' => $r['kategori_khas'],
+    'rating' => $r['rating'] ?? null,
+    'foto' => (!empty($r['link_foto']) && is_file(FCPATH . $r['link_foto'])) ? '/' . $r['link_foto'] : null,
     'latitude' => $r['latitude'], 'longitude' => $r['longitude'], 'jarak_km' => $r['jarak_km'],
 ], $hasil), $f) ?>;
 
-var peta = L.map('peta').setView([asal.lat, asal.lng], 15);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+var petaJalan = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   maxZoom: 19,
-  attribution: '&copy; kontributor OpenStreetMap'
-}).addTo(peta);
+  subdomains: 'abcd',
+  attribution: '&copy; OpenStreetMap &copy; CARTO'
+});
+var petaSatelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
+  maxZoom: 19,
+  attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+});
+
+var peta = L.map('peta', { layers: [petaJalan] }).setView([asal.lat, asal.lng], 15);
+L.control.layers({ 'Peta Bersih': petaJalan, 'Satelit': petaSatelit }, null, { position: 'topright' }).addTo(peta);
 
 var lingkaran = L.circle([asal.lat, asal.lng], {radius: asal.radius * 1000, color: '#2f6f3e', weight: 1.5, fillColor: '#2f6f3e', fillOpacity: 0.06}).addTo(peta);
 L.circleMarker([asal.lat, asal.lng], {radius: 9, color: '#fff', weight: 2, fillColor: '#2f6f3e', fillOpacity: 1})
@@ -139,14 +148,25 @@ data.forEach(function (r) {
   var j = parseFloat(r.jarak_km);
   var teksJarak = j < 1 ? Math.round(j * 1000) + ' m' : j.toFixed(1).replace('.', ',') + ' km';
   var el = document.createElement('div');
+  el.className = 'popup-resto';
+  if (r.foto) {
+    var img = document.createElement('img');
+    img.src = r.foto;
+    img.alt = r.nama;
+    img.onerror = function () { this.remove(); };
+    el.appendChild(img);
+  }
   var a = document.createElement('a');
+  a.className = 'popup-resto-nama';
   a.href = '/restoran/' + encodeURIComponent(r.slug);
   a.textContent = r.nama;
   var s = document.createElement('div');
-  s.textContent = r.kategori_khas + ' \u00b7 ' + teksJarak;
+  s.className = 'popup-resto-info';
+  var bintang = r.rating ? '\u2605 ' + r.rating + ' \u00b7 ' : '';
+  s.textContent = bintang + r.kategori_khas + ' \u00b7 ' + teksJarak;
   el.appendChild(a);
   el.appendChild(s);
-  L.marker([parseFloat(r.latitude), parseFloat(r.longitude)]).addTo(peta).bindPopup(el);
+  L.marker([parseFloat(r.latitude), parseFloat(r.longitude)]).addTo(peta).bindPopup(el, { maxWidth: 230 });
 });
 peta.fitBounds(lingkaran.getBounds(), {padding: [20, 20]});
 
