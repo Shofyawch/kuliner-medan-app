@@ -69,6 +69,7 @@ foreach ($menu as $m) {
     <?php else: ?>
       <?php foreach ($perKategori as $namaKat => $daftar): ?>
         <h3 class="menu-grup"><?= esc($namaKat) ?></h3>
+        <div class="menu-grid">
         <?php foreach ($daftar as $m): $fm = $fotoMenu((string) $m['nama_menu']); ?>
           <div class="menu-baris">
             <span class="menu-nama">
@@ -78,6 +79,7 @@ foreach ($menu as $m) {
             <span class="menu-harga">Rp <?= number_format((int) $m['harga'], 0, ',', '.') ?></span>
           </div>
         <?php endforeach; ?>
+        </div>
       <?php endforeach; ?>
     <?php endif; ?>
   </section>
