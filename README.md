@@ -1,112 +1,79 @@
 # Kuliner Khas Medan
 
-Aplikasi web untuk menjelajahi kuliner khas **Kota Medan**: daftar restoran, detail dan menu, serta restoran terdekat dengan peta. Dibuat dengan CodeIgniter 4 dan PostgreSQL.
+Aplikasi untuk menjelajahi kuliner khas **Kota Medan**, terdiri dari satu REST API dan beberapa tampilan web di atas satu database PostgreSQL. Dibuat dengan CodeIgniter 4.
 
-> Catatan data: harga menu masih **estimasi**, bukan harga asli. Status halal banyak yang belum terverifikasi. Penilaian "khas Medan" masih perlu disetujui tim.
+> Catatan data: harga menu masih **estimasi**. Status halal banyak yang belum terverifikasi.
 
 ## Fitur
 
-- **Daftar restoran**: filter kategori, pencarian nama, urut rating, 20 per halaman.
-- **Detail restoran**: info, tautan Google Maps, daftar menu, dan peta lokasi.
-- **Restoran terdekat**: pilih titik patokan atau pakai lokasi browser, radius 1 sampai 5 km, hasil di peta dan daftar. Jarak dihitung garis lurus, bukan jarak tempuh.
+- Daftar restoran dengan pencarian, filter kategori, kecamatan, harga, dan urutan.
+- Detail restoran: menu, peta, ulasan, dan penginapan terdekat.
+- Restoran terdekat dari titik patokan atau lokasi browser (jarak garis lurus).
+- Daftar penginapan dari API Singgah Medan.
+- Daftar akun, login, dan ulasan pengunjung.
+- Dashboard admin: kelola restoran dan menu, moderasi ulasan restoran dan penginapan.
+
+## Aplikasi dan alamat
+
+| Aplikasi | Alamat | Cara mengambil data |
+|---|---|---|
+| Situs utama | `/` | Sebagian besar langsung dari database (sisi server) |
+| Dashboard admin | `/admin` | REST API (setelah login admin) |
+| Web Admin | `/web-admin.html` | REST API |
+| Web Pengguna | `/web-publik.html` | REST API |
+| REST API | `/api/v1` | lihat [docs/API.md](docs/API.md) |
 
 ## Kebutuhan
 
-- PHP 8.2 atau lebih baru (PHP 8.5 butuh CodeIgniter 4.7.0 ke atas), dengan ekstensi `intl`, `mbstring`, `pgsql`, `curl`, `xml`
+- PHP 8.2 atau lebih baru dengan ekstensi `intl`, `mbstring`, `pgsql`, `curl`, `xml`
 - Composer
-- PostgreSQL
+- PostgreSQL (tim memakai Supabase) dan klien `psql`
 - Git
 
 ## Cara memasang
+
+Langkah lengkap, termasuk membuat database dan akun admin, ada di [docs/PANDUAN-INSTALASI.md](docs/PANDUAN-INSTALASI.md).
 
 ~~~bash
 git clone https://github.com/Shofyawch/kuliner-medan-app.git
 cd kuliner-medan-app
 composer install
-~~~
-
-### 1. Buat database
-
-~~~bash
-sudo -u postgres createdb kuliner_medan
-sudo -u postgres psql -d kuliner_medan < database/schema.sql
-sudo -u postgres psql -d kuliner_medan < database/seed.sql
-~~~
-
-Cek hasilnya, harus 83 dan 305:
-
-~~~bash
-sudo -u postgres psql -d kuliner_medan -c "SELECT COUNT(*) FROM restoran;"
-sudo -u postgres psql -d kuliner_medan -c "SELECT COUNT(*) FROM menu;"
-~~~
-
-Atur password pengguna postgres milikmu sendiri:
-
-~~~bash
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'isi_password_sendiri';"
-~~~
-
-### 2. Buat file `.env`
-
-~~~bash
-cp env .env
-~~~
-
-Lalu tambahkan di bagian bawah `.env` (ganti password dengan milikmu):
-
-~~~
-CI_ENVIRONMENT = development
-
-database.default.hostname = localhost
-database.default.database = kuliner_medan
-database.default.username = postgres
-database.default.password = isi_password_sendiri
-database.default.DBDriver = Postgre
-database.default.port = 5432
-database.default.charset = utf8
-~~~
-
-Baris `charset = utf8` wajib. Tanpa itu muncul error `invalid value for parameter "client_encoding"`.
-
-File `.env` **jangan** diunggah ke GitHub dan password **jangan** dikirim lewat chat.
-
-### 3. Jalankan
-
-~~~bash
+cp .env.example .env    # lalu isi nilainya
 php spark serve
 ~~~
 
-Buka http://localhost:8080.
+Tambahkan juga baris `database.default.charset = utf8` di `.env`. Tanpa itu bisa muncul error `invalid value for parameter "client_encoding"`.
 
-## Struktur penting
+Buka http://localhost:8080. Kalau port 8080 tidak bisa dipakai, jalankan `php spark serve --host 127.0.0.1 --port 8081` dan ubah `app.baseURL` di `.env` mengikuti alamat itu.
 
-| Berkas | Fungsi |
-|---|---|
-| `app/Controllers/Kuliner.php` | Daftar dan detail restoran |
-| `app/Controllers/Terdekat.php` | Restoran terdekat |
-| `app/Models/RestoranModel.php`, `MenuModel.php` | Model tabel |
-| `app/Views/kuliner/` | Tampilan (index, detail, terdekat) |
-| `app/Config/Routes.php` | Rute |
-| `database/schema.sql`, `seed.sql` | Struktur dan isi database |
-
-Rute: `/` (daftar), `/restoran/{slug}` (detail), `/terdekat` (terdekat).
+File `.env` **jangan** diunggah ke GitHub, dan password atau kunci **jangan** dikirim lewat chat.
 
 ## Database
 
-- Tabel `restoran` dan `menu` (relasi lewat `restoran_id`).
-- Fungsi `restoran_terdekat(lat, lng, radius_km, limit)` mengembalikan restoran terdekat dalam radius tertentu.
-- Kolom `id` belum auto-increment; perlu diubah sebelum ada fitur tambah data dari aplikasi.
+- Tabel: `restoran`, `menu`, `pengguna`, `ulasan`, `log_integrasi`.
+- View: `v_restoran_ringkas`, `v_ulasan`.
+- Function: `restoran_terdekat`, `tambah_restoran_dengan_menu` (satu transaksi).
+- Trigger `trg_naikkan_versi`: menaikkan `versi` untuk mencegah perubahan saling menimpa.
+- User database: `kuliner_api` (dipakai aplikasi) dan `kuliner_readonly` (hanya baca).
+
+`database/schema.sql` **menghapus tabel lama**. Jangan dijalankan di database yang sudah berisi data.
+
+## Dokumentasi
+
+| Berkas | Isi |
+|---|---|
+| [docs/API.md](docs/API.md) | Semua endpoint |
+| [docs/PANDUAN-INSTALASI.md](docs/PANDUAN-INSTALASI.md) | Cara memasang |
+| [docs/DOKUMENTASI_INTEGRASI_API.md](docs/DOKUMENTASI_INTEGRASI_API.md) | Panduan untuk kelompok lain |
+| [docs/erd-kuliner-medan.dbml](docs/erd-kuliner-medan.dbml) | ERD (impor ke dbdiagram.io) |
+| [docs/kuliner-medan-api.postman_collection.json](docs/kuliner-medan-api.postman_collection.json) | Koleksi Postman |
+| `docs/uji-*.sh`, `docs/bukti-rollback.sql` | Skrip uji |
 
 ## Bekerja bareng
 
 - Sebelum mulai: `git pull`.
-- Setelah selesai: `git add .`, `git commit -m "pesan singkat"`, `git push`.
+- Setelah selesai: `git add <berkas>`, `git commit -m "pesan singkat"`, `git pull`, `git push`.
 - Bagi tugas per bagian supaya tidak mengedit berkas yang sama.
-- Perubahan data hanya ada di database masing-masing. Kalau data diubah, perbarui `database/seed.sql` lalu commit, atau sepakati satu orang pemegang data utama.
-
-## Yang masih direncanakan
-
-Perapian tampilan (UI/UX), filter lebih lengkap, halaman admin, foto restoran, perapian data bersama tim, dan deploy.
 
 ## Lisensi
 
