@@ -15,6 +15,64 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('head') ?>
+<style>
+  .multi { position: relative; }
+
+.multi summary {
+  list-style: none;
+  cursor: pointer;
+  background: #fff;
+  color: #222;
+  font: inherit;
+  padding: 12px 40px 12px 18px;
+  border-radius: 12px;
+  min-width: 230px;
+  position: relative;
+  white-space: nowrap;
+}
+.multi summary::-webkit-details-marker { display: none; }
+.multi summary::marker { content: ""; }
+.multi summary::after {
+  content: "\25BE";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.multi[open] summary { outline: 2px solid #f5b800; }
+
+.multi-isi {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 8px 24px #0003;
+}
+.multi-isi label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #222;
+  white-space: nowrap;
+}
+.multi-isi label:hover { background: #f1f1f1; }
+.multi-isi input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: #2f6f3e;
+}
+</style>
+<?= $this->endSection() ?>
+
+<?= $this->section('head') ?>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
 <style>
   body {
