@@ -159,7 +159,10 @@ data.forEach(function (r) {
   s.textContent = bintang + r.kategori_khas + ' \u00b7 ' + teksJarak;
   el.appendChild(a);
   el.appendChild(s);
-  L.marker([parseFloat(r.latitude), parseFloat(r.longitude)]).addTo(peta).bindPopup(el, { maxWidth: 230 });
+  var marker = L.marker([parseFloat(r.latitude), parseFloat(r.longitude)])
+    .addTo(peta)
+    .bindPopup(el, { maxWidth: 230 });
+  marker.on('mouseover', function () { this.openPopup(); });
 });
 peta.fitBounds(lingkaran.getBounds(), {padding: [20, 20]});
 
