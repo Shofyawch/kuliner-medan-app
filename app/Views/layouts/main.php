@@ -68,7 +68,7 @@
         <ul class="footer-kontak">
           <li>Medan, Sumatera Utara</li>
           <li><a href="mailto:halo@kulinermedan.id">halo@kulinermedan.id</a></li>
-          <li>Senin – Minggu, 08.00 – 21.00 WIB</li>
+          <li><a href="https://wa.me/6283823253829" target="_blank" rel="noopener">083823253829</a></li>
           <li><a href="/kontak" class="footer-cta">Kirim Pesan &rarr;</a></li>
         </ul>
       </div>

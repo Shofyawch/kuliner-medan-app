@@ -20,11 +20,7 @@
         </li>
         <li>
           <strong>WhatsApp Layanan Info</strong>
-          <span>+62 812-0000-0000 (Chat saja)</span>
-        </li>
-        <li>
-          <strong>Jam Operasional</strong>
-          <span>Senin – Minggu, 08.00 – 21.00 WIB</span>
+          <span><a href="https://wa.me/6283823253829" target="_blank" rel="noopener">083823253829</a> (Chat saja)</span>
         </li>
       </ul>
       <p class="catatan" style="margin-top:14px;">Butuh jawaban cepat? Cek juga halaman <a href="/faq" style="color:var(--marun);font-weight:600;">FAQ</a>.</p>
