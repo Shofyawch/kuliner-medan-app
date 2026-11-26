@@ -6,7 +6,11 @@
   <h1 class="judul-halaman">Pertanyaan yang Sering Diajukan (FAQ)</h1>
   <p class="info-sub">Temukan jawaban seputar pencarian kuliner, status halal, fitur lokasi terdekat, dan ulasan pengguna.</p>
 
-  <div class="faq-daftar">
+  <div class="faq-cari">
+    <input type="search" id="faq-cari-input" placeholder="Cari pertanyaan... (contoh: halal, ulasan, lokasi)" aria-label="Cari pertanyaan di FAQ">
+  </div>
+
+  <div class="faq-daftar" id="faq-daftar">
     <details class="faq-item" name="faq" open>
       <summary>Bagaimana cara mencari kuliner terdekat dari lokasi saya?</summary>
       <div class="faq-isi">
@@ -49,5 +53,36 @@
       </div>
     </details>
   </div>
+
+  <p id="faq-kosong" class="faq-kosong" hidden>Tidak ada pertanyaan yang cocok dengan kata kunci tersebut.</p>
 </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('skrip') ?>
+<script>
+(function () {
+  var input = document.getElementById('faq-cari-input');
+  var daftar = document.getElementById('faq-daftar');
+  var kosong = document.getElementById('faq-kosong');
+  if (!input || !daftar || !kosong) return;
+
+  var items = Array.prototype.slice.call(daftar.querySelectorAll('.faq-item'));
+
+  input.addEventListener('input', function () {
+    var kata = input.value.trim().toLowerCase();
+    var tampil = 0;
+
+    items.forEach(function (item) {
+      var cocok = kata === '' || item.textContent.toLowerCase().indexOf(kata) !== -1;
+      item.hidden = !cocok;
+      if (cocok) {
+        tampil++;
+        if (kata !== '') item.open = true;
+      }
+    });
+
+    kosong.hidden = tampil > 0;
+  });
+})();
+</script>
 <?= $this->endSection() ?>

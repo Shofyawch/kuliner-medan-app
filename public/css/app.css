@@ -192,6 +192,10 @@ button.tombol:disabled{opacity:.6;cursor:wait}
 /* Halaman Informasi (FAQ, Kontak, Tentang, Ketentuan) */
 .halaman-info{padding-bottom:16px}
 .info-sub{color:var(--abu);margin:0 0 24px;max-width:65ch}
+.faq-cari{margin:0 0 18px}
+.faq-cari input{width:100%;max-width:460px;box-sizing:border-box;padding:11px 16px;border:1.5px solid var(--garis);border-radius:12px;background:var(--putih);color:var(--teks);font:inherit;font-size:15px;box-shadow:0 2px 8px rgba(48,24,14,.04);transition:border-color .15s,box-shadow .15s}
+.faq-cari input:focus{outline:none;border-color:var(--marun);box-shadow:0 0 0 3px rgba(107,18,28,.12)}
+.faq-kosong{margin:16px 0 0;padding:18px 20px;background:var(--putih);border:1px dashed var(--garis);border-radius:14px;color:var(--abu);text-align:center}
 .faq-daftar{display:flex;flex-direction:column;gap:12px}
 .faq-item{background:var(--putih);border:1px solid var(--garis);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(48,24,14,.04);transition:border-color .15s,box-shadow .15s}
 .faq-item[open]{border-color:var(--marun);box-shadow:var(--bayangan)}
