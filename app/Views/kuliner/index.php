@@ -7,70 +7,12 @@
  * @var string $kecamatan
  * @var string $cari
  * @var string $harga
- * @var string $urut
+ * @var array|string|null $urut
  * @var array $restoran
  * @var \CodeIgniter\Pager\Pager $pager
  */
 ?>
 <?= $this->extend('layouts/main') ?>
-
-<?= $this->section('head') ?>
-<style>
-  .multi { position: relative; }
-
-.multi summary {
-  list-style: none;
-  cursor: pointer;
-  background: #fff;
-  color: #222;
-  font: inherit;
-  padding: 12px 40px 12px 18px;
-  border-radius: 12px;
-  min-width: 230px;
-  position: relative;
-  white-space: nowrap;
-}
-.multi summary::-webkit-details-marker { display: none; }
-.multi summary::marker { content: ""; }
-.multi summary::after {
-  content: "\25BE";
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.multi[open] summary { outline: 2px solid #f5b800; }
-
-.multi-isi {
-  position: absolute;
-  z-index: 50;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 6px;
-  box-shadow: 0 8px 24px #0003;
-}
-.multi-isi label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #222;
-  white-space: nowrap;
-}
-.multi-isi label:hover { background: #f1f1f1; }
-.multi-isi input[type=checkbox] {
-  width: 18px;
-  height: 18px;
-  accent-color: #2f6f3e;
-}
-</style>
-<?= $this->endSection() ?>
 
 <?= $this->section('head') ?>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
@@ -288,6 +230,7 @@
     color: var(--cabai)
   }
 
+  /* ---------- bar filter ---------- */
   .br-alat {
     display: flex;
     flex-wrap: wrap;
@@ -306,15 +249,19 @@
     font-family: "Bricolage Grotesque", var(--font-teks)
   }
 
-  .br-alat select {
+  .br-alat select,
+  .multi summary {
+    box-sizing: border-box;
+    width: 200px;
+    height: 40px;
     font: inherit;
     font-size: 14px;
-    padding: 9px 12px;
+    line-height: 1.2;
+    padding: 0 12px;
     border: 0;
     border-radius: 10px;
     background: #fff;
     color: var(--arang);
-    max-width: 100%;
     cursor: pointer
   }
 
@@ -324,6 +271,87 @@
     font-size: 14px
   }
 
+  /* dropdown urutan (boleh pilih lebih dari satu) */
+  .multi {
+    position: relative;
+    width: 200px
+  }
+
+  .multi summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-right: 34px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+  }
+
+  .multi summary::-webkit-details-marker {
+    display: none
+  }
+
+  .multi summary::marker {
+    content: ""
+  }
+
+  .multi summary::after {
+    content: "\25BE";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%)
+  }
+
+  .multi[open] summary {
+    outline: 3px solid var(--kunyit)
+  }
+
+  .multi-isi {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25)
+  }
+
+  .multi-isi label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--arang);
+    font-size: 14px;
+    white-space: nowrap
+  }
+
+  .multi-isi label:hover {
+    background: #f1f1f1
+  }
+
+  .multi-isi input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--daun)
+  }
+
+  .multi-isi .paling-cocok {
+    border-bottom: 1px solid #eee;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 4px
+  }
+
+  /* ---------- daftar restoran ---------- */
   .br-daftar {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -404,12 +432,14 @@
   .br-cari input:focus-visible,
   .br-piring a:focus-visible,
   .br-baris:focus-visible,
-  .br-alat select:focus-visible {
+  .br-alat select:focus-visible,
+  .multi summary:focus-visible {
     outline: 3px solid var(--daun);
     outline-offset: 2px
   }
 
-  .br-alat select:focus-visible {
+  .br-alat select:focus-visible,
+  .multi summary:focus-visible {
     outline-color: var(--kunyit)
   }
 
@@ -463,6 +493,16 @@
       width: 100%
     }
 
+    .br-alat select,
+    .multi,
+    .multi summary {
+      width: 100%
+    }
+
+    .multi {
+      flex: 1 1 100%
+    }
+
     .br-alat select {
       flex: 1 1 100%
     }
@@ -482,11 +522,23 @@
 
 <?= $this->section('konten') ?>
 <?php
+// urutan: bisa lebih dari satu (rating, harga). Kosong = "Paling cocok"
+$urutDipilih = array_values(array_intersect((array) ($urut ?? []), ['rating', 'harga']));
+$labelUrut = [
+  'rating' => 'Rating Google tertinggi',
+  'harga'  => 'Harga termurah',
+];
+$teksUrut = match (count($urutDipilih)) {
+  0       => 'Paling cocok',
+  1       => $labelUrut[$urutDipilih[0]],
+  default => count($urutDipilih) . ' urutan dipilih',
+};
+
 $param = array_filter([
   'q' => $cari,
   'kecamatan' => $kecamatan,
   'harga' => $harga,
-  'urut' => $urut,
+  'urut' => $urutDipilih,
 ]);
 $aktifFilter = $kategori || $param;
 $linkKat = static function (?string $k) use ($param): string {
@@ -560,42 +612,38 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
 
   <div class="br-alat">
     <h2><?= $pager->getTotal() ?> restoran<?= $kategori ? ' ' . esc($kategori) : '' ?></h2>
+
     <select name="kecamatan" form="form-cari" aria-label="Kecamatan" onchange="this.form.submit()">
       <option value="">Semua kecamatan</option>
       <?php foreach ($daftarKecamatan as $kc): ?>
         <option value="<?= esc($kc['kecamatan']) ?>" <?= $kecamatan === $kc['kecamatan'] ? 'selected' : '' ?>><?= esc($kc['kecamatan']) ?> (<?= $kc['jumlah'] ?>)</option>
       <?php endforeach; ?>
     </select>
+
     <select name="harga" form="form-cari" aria-label="Harga" onchange="this.form.submit()">
       <option value="">Semua harga</option>
       <option value="murah" <?= $harga === 'murah' ? 'selected' : '' ?>>Murah (sampai Rp 25 rb)</option>
       <option value="sedang" <?= $harga === 'sedang' ? 'selected' : '' ?>>Sedang (Rp 25&ndash;60 rb)</option>
       <option value="mahal" <?= $harga === 'mahal' ? 'selected' : '' ?>>Mahal (di atas Rp 60 rb)</option>
     </select>
-    <?php
-$urutDipilih = array_values(array_intersect((array) ($urut ?? []), ['rating', 'harga']));
-$labelUrut = [
-    'rating' => 'Rating Google tertinggi',
-    'harga'  => 'Harga termurah',
-];
-$teksUrut = match (count($urutDipilih)) {
-    0       => 'Paling cocok',
-    1       => $labelUrut[$urutDipilih[0]],
-    default => count($urutDipilih) . ' urutan dipilih',
-};
-?>
-<details class="multi" id="urut-multi">
-  <summary><?= esc($teksUrut) ?></summary>
-  <div class="multi-isi">
-    <?php foreach ($labelUrut as $nilai => $teks): ?>
-      <label>
-        <input type="checkbox" name="urut[]" value="<?= esc($nilai) ?>"
-               <?= in_array($nilai, $urutDipilih, true) ? 'checked' : '' ?>>
-        <?= esc($teks) ?>
-      </label>
-    <?php endforeach; ?>
-  </div>
-</details>
+
+    <details class="multi" id="urut-multi">
+      <summary aria-label="Urutkan"><?= esc($teksUrut) ?></summary>
+      <div class="multi-isi">
+        <label class="paling-cocok">
+          <input type="checkbox" id="urut-default" <?= empty($urutDipilih) ? 'checked' : '' ?>>
+          Paling cocok
+        </label>
+        <?php foreach ($labelUrut as $nilai => $teks): ?>
+          <label>
+            <input type="checkbox" name="urut[]" form="form-cari" value="<?= esc($nilai) ?>"
+              <?= in_array($nilai, $urutDipilih, true) ? 'checked' : '' ?>>
+            <?= esc($teks) ?>
+          </label>
+        <?php endforeach; ?>
+      </div>
+    </details>
+
     <?php if ($aktifFilter): ?><a href="/#pilih">Atur ulang</a><?php endif; ?>
   </div>
 
@@ -644,4 +692,38 @@ $teksUrut = match (count($urutDipilih)) {
 
   <?= $pager->links() ?>
 </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('skrip') ?>
+<script>
+  (function() {
+    var kotak = document.getElementById('urut-multi');
+    var form = document.getElementById('form-cari');
+    if (!kotak || !form) return;
+
+    var semua = kotak.querySelectorAll('input[name="urut[]"]');
+    var bawaan = document.getElementById('urut-default');
+
+    // "Paling cocok" dipilih -> lepas semua pilihan lain
+    bawaan.addEventListener('change', function() {
+      semua.forEach(function(c) { c.checked = false; });
+      bawaan.checked = true;
+      form.submit();
+    });
+
+    // pilihan lain berubah -> "Paling cocok" ikut menyesuaikan
+    semua.forEach(function(c) {
+      c.addEventListener('change', function() {
+        var ada = Array.prototype.some.call(semua, function(x) { return x.checked; });
+        bawaan.checked = !ada;
+        form.submit();
+      });
+    });
+
+    // tutup dropdown kalau klik di luar
+    document.addEventListener('click', function(e) {
+      if (!kotak.contains(e.target)) kotak.removeAttribute('open');
+    });
+  })();
+</script>
 <?= $this->endSection() ?>
