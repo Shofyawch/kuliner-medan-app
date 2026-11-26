@@ -79,6 +79,7 @@ class HotelService
                     'ngrok-skip-browser-warning' => '1',
                     'Accept'                     => 'application/json',
                     'Content-Type'               => 'application/json',
+                    'X-API-KEY'                  => (string) env('HOTEL_API_KEY', ''),
                 ],
                 'http_errors' => false,
                 'verify'      => (bool) env('HOTEL_API_VERIFY', true),
