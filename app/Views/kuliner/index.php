@@ -233,30 +233,33 @@
   /* ---------- bar filter ---------- */
   .br-alat {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
     align-items: center;
     margin: 44px 0 20px;
-    padding: 14px 16px;
+    padding: 14px 18px;
     background: var(--daun);
     border-radius: 18px;
-    color: #fff
+    color: #fff;
+    overflow-x: auto
   }
 
   .br-alat h2 {
-    font-size: 20px;
-    margin: 0 auto 0 4px;
+    font-size: 18px;
+    margin: 0 4px 0 0;
     white-space: nowrap;
-    font-family: "Bricolage Grotesque", var(--font-teks)
+    font-family: "Bricolage Grotesque", var(--font-teks);
+    flex: none
   }
 
   .br-alat select,
   .multi summary {
     box-sizing: border-box;
-    width: 168px;
+    width: 158px;
+    flex: 0 0 158px;
     height: 40px;
     font: inherit;
-    font-size: 13.5px;
+    font-size: 13px;
     line-height: 1.2;
     padding: 0 10px;
     border: 0;
@@ -269,13 +272,16 @@
   .br-alat a {
     color: var(--kunyit);
     font-weight: 700;
-    font-size: 14px
+    font-size: 14px;
+    white-space: nowrap;
+    flex: none
   }
 
-    .btn-terapkan {
+  .btn-terapkan {
     box-sizing: border-box;
+    flex: none;
     height: 40px;
-    padding: 0 22px;
+    padding: 0 20px;
     border: 0;
     border-radius: 10px;
     background: var(--kunyit);
@@ -283,7 +289,8 @@
     font: inherit;
     font-size: 14px;
     font-weight: 700;
-    cursor: pointer
+    cursor: pointer;
+    white-space: nowrap
   }
 
   .btn-terapkan:hover {
