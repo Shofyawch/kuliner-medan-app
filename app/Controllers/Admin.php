@@ -3,8 +3,9 @@
 namespace App\Controllers;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
-/** Dashboard admin. Memakai sesi login web, lalu memberi token untuk API CRUD. */
+/** Dashboard admin. Memakai token dari POST /api/v1/auth/login untuk API CRUD. */
 class Admin extends BaseController
 {
     public function index()
@@ -28,16 +29,18 @@ class Admin extends BaseController
             return $this->response->setStatusCode(503)->setBody('JWT_SECRET belum diisi di file .env');
         }
 
-        // Isi token sama dengan POST /api/v1/auth/login
-        $now   = time();
-        $token = JWT::encode([
-            'iss'  => 'kuliner-medan-api',
-            'iat'  => $now,
-            'exp'  => $now + max(60, (int) env('JWT_TTL', 7200)),
-            'sub'  => (int) $u['id'],
-            'usr'  => $u['username'],
-            'role' => $u['role'],
-        ], $rahasia, 'HS256');
+        // Token yang diterima saat login. Kalau tidak ada atau kedaluwarsa, login ulang.
+        $token = (string) session()->get('api_token');
+        try {
+            $isi = JWT::decode($token, new Key($rahasia, 'HS256'));
+            if ((int) ($isi->sub ?? 0) !== (int) $u['id']) {
+                throw new \RuntimeException('Token bukan milik pengguna ini.');
+            }
+        } catch (\Throwable $e) {
+            session()->remove(['pengguna_id', 'username', 'role', 'isLoggedIn', 'api_token']);
+
+            return redirect()->to('/login')->with('error', 'Sesi sudah habis. Silakan masuk lagi.');
+        }
 
         $this->response->setHeader('Cache-Control', 'no-store');
 

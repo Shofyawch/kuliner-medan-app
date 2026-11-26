@@ -19,8 +19,12 @@
       </div>
     <?php endif; ?>
 
-    <form method="post" action="/login">
+    <div class="alert alert-galat" id="galat-login" role="alert" hidden></div>
+    <noscript><div class="alert alert-galat">Aktifkan JavaScript untuk masuk.</div></noscript>
+
+    <form method="post" action="/login" id="form-login">
       <?= csrf_field() ?>
+      <input type="hidden" name="token" id="token">
       <div style="margin-bottom: 16px;">
         <label for="username" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Username</label>
         <input type="text" id="username" name="username" value="<?= old('username') ?>" placeholder="Masukkan username Anda" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" required autofocus>
@@ -28,7 +32,7 @@
 
       <div style="margin-bottom: 22px;">
         <label for="password" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Password</label>
-        <input type="password" id="password" name="password" placeholder="Masukkan password" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" required>
+        <input type="password" id="password" autocomplete="current-password" placeholder="Masukkan password" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" required>
       </div>
 
       <button type="submit" class="tombol" style="width: 100%; padding: 12px; font-size: 16px; border: 0; cursor: pointer;">
@@ -41,5 +45,36 @@
     </div>
   </div>
 </div>
+<script>
+(() => {
+  const form = document.getElementById('form-login');
+  const galat = document.getElementById('galat-login');
+  const tombol = form.querySelector('button[type=submit]');
+  const gagal = (pesan) => { galat.textContent = pesan; galat.hidden = false; tombol.disabled = false; };
+
+  // Password hanya dikirim ke API. Ke halaman web yang diteruskan cuma tokennya.
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    galat.hidden = true;
+    tombol.disabled = true;
+    try {
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ username: form.username.value.trim(), password: form.password.value }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.data?.token) {
+        return gagal(json?.message || 'Login gagal (kode ' + res.status + ').');
+      }
+      document.getElementById('token').value = json.data.token;
+      form.submit();
+    } catch (err) {
+      gagal('Server tidak bisa dihubungi.');
+    }
+  });
+  window.addEventListener('pageshow', () => { tombol.disabled = false; });
+})();
+</script>
 <?= $this->endSection() ?>
 
