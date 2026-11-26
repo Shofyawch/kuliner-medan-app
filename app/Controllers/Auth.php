@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 class Auth extends BaseController
 {
     public function login()
@@ -15,18 +18,28 @@ class Auth extends BaseController
         ]);
     }
 
+    /**
+     * Username dan password diperiksa oleh POST /api/v1/auth/login (dipanggil dari
+     * halaman login). Di sini hanya token dari endpoint itu yang diterima untuk
+     * membuat sesi web, jadi semua aplikasi memakai endpoint login yang sama.
+     */
     public function prosesLogin()
     {
-        $username = trim((string) $this->request->getPost('username'));
-        $password = (string) $this->request->getPost('password');
+        $token   = (string) $this->request->getPost('token');
+        $rahasia = (string) env('JWT_SECRET', '');
 
-        if ($username === '' || $password === '') {
-            return redirect()->back()->withInput()->with('error', 'Username dan password wajib diisi.');
+        try {
+            if ($token === '' || $rahasia === '') {
+                throw new \RuntimeException('Token atau JWT_SECRET kosong.');
+            }
+            $isi = JWT::decode($token, new Key($rahasia, 'HS256'));
+        } catch (\Throwable $e) {
+            return redirect()->back()->withInput()->with('error', 'Login tidak berhasil. Silakan coba lagi.');
         }
 
         try {
             $user = db_connect()->table('pengguna')
-                ->where('username', $username)
+                ->where('id', (int) ($isi->sub ?? 0))
                 ->where('aktif', true)
                 ->get()->getRowArray();
         } catch (\Throwable $e) {
@@ -34,15 +47,17 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan sistem database.');
         }
 
-        if ($user === null || !password_verify($password, $user['password_hash'])) {
-            return redirect()->back()->withInput()->with('error', 'Username atau password salah.');
+        if ($user === null) {
+            return redirect()->back()->withInput()->with('error', 'Akun tidak ditemukan atau tidak aktif.');
         }
 
+        session()->regenerate(true);
         session()->set([
             'pengguna_id' => (int) $user['id'],
             'username'    => $user['username'],
             'role'        => $user['role'],
             'isLoggedIn'  => true,
+            'api_token'   => $token,
         ]);
 
         if ($user['role'] === 'admin') {
