@@ -232,3 +232,12 @@ button.tombol:disabled{opacity:.6;cursor:wait}
 .btn-sandi:hover{color:var(--marun);background:rgba(107,18,28,.08)}
 .btn-sandi:focus-visible{outline:2px solid var(--emas);outline-offset:1px}
 .btn-sandi[aria-pressed="true"]{color:var(--marun)}
+
+.patokan-area{margin-top:22px}
+.patokan-judul{margin:0 0 12px;font-size:17px;color:var(--marun)}
+.patokan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.patokan-kartu{display:flex;align-items:center;gap:12px;padding:16px;background:var(--putih);border:1px solid var(--garis);border-radius:14px;text-decoration:none;color:var(--teks);box-shadow:0 2px 10px rgba(48,24,14,.04);transition:border-color .15s,transform .15s,box-shadow .15s}
+.patokan-kartu:hover{border-color:var(--marun);transform:translateY(-2px);box-shadow:var(--bayangan)}
+.patokan-kartu strong{display:block;font-size:15.5px;color:var(--marun);margin-bottom:2px}
+.patokan-kartu small{display:block;font-size:12.5px;color:var(--abu)}
+.patokan-ikon{width:40px;height:40px;border-radius:10px;background:#fdf3dc;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}

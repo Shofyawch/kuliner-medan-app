@@ -11,8 +11,6 @@
 ?>
 <?= $this->extend('layouts/main') ?>
 
-<?= $this->extend('layouts/main') ?>
-
 <?= $this->section('head') ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <?= $this->endSection() ?>
@@ -43,6 +41,23 @@ $fmtJarak  = static fn ($j) => $j < 1 ? round($j * 1000) . ' m' : number_format(
       <p class="catatan">Pilih titik patokan atau gunakan lokasimu, lalu lihat restoran di sekitarnya.</p>
     <?php endif; ?>
   </section>
+
+  <?php if (!$punyaAsal): ?>
+    <section class="patokan-area" aria-label="Pilihan cepat titik patokan">
+      <h2 class="patokan-judul">Atau pilih langsung titik populer di Medan</h2>
+      <div class="patokan-grid">
+        <?php foreach ($patokan as $kode => $p): ?>
+          <a class="patokan-kartu" href="/terdekat?<?= esc(http_build_query(['patokan' => $kode, 'radius' => $radius])) ?>">
+            <span class="patokan-ikon" aria-hidden="true">&#128205;</span>
+            <div>
+              <strong><?= esc($p[0]) ?></strong>
+              <small>Cari kuliner dalam radius <?= esc($radius) ?> km &rarr;</small>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </section>
+  <?php endif; ?>
 
   <?php if ($punyaAsal): ?>
     <div class="pil" aria-label="Radius pencarian">
