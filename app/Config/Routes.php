@@ -67,6 +67,9 @@ $routes->group('api/v1', ['filter' => 'apiauth:login', 'namespace' => 'App\Contr
 
 $routes->group('api/v1', ['filter' => 'apiauth:admin', 'namespace' => 'App\Controllers\Api\V1'], static function ($routes) {
     $routes->get('ulasan', 'Ulasan::semua');
+    $routes->get('hotel', 'HotelUlasan::daftarHotel');
+    $routes->get('hotel/ulasan', 'HotelUlasan::index');
+    $routes->delete('hotel/ulasan/(:num)', 'HotelUlasan::delete/$1');
 });
 
 // ---- API v1: preflight CORS dan alamat yang tidak dikenal (selalu paling bawah) ----
