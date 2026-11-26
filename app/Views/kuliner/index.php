@@ -234,7 +234,7 @@
   .br-alat {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     margin: 44px 0 20px;
     padding: 14px 16px;
@@ -244,20 +244,21 @@
   }
 
   .br-alat h2 {
-    font-size: 21px;
+    font-size: 20px;
     margin: 0 auto 0 4px;
+    white-space: nowrap;
     font-family: "Bricolage Grotesque", var(--font-teks)
   }
 
   .br-alat select,
   .multi summary {
     box-sizing: border-box;
-    width: 200px;
+    width: 168px;
     height: 40px;
     font: inherit;
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 1.2;
-    padding: 0 12px;
+    padding: 0 10px;
     border: 0;
     border-radius: 10px;
     background: #fff;
@@ -297,7 +298,7 @@
   /* dropdown urutan (boleh pilih lebih dari satu) */
   .multi {
     position: relative;
-    width: 200px
+    width: 168px
   }
 
   .multi summary {
