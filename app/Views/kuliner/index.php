@@ -516,7 +516,7 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
     </select>
     <select name="urut" form="form-cari" aria-label="Urutkan" onchange="this.form.submit()">
       <option value="">Paling cocok</option>
-      <option value="rating" <?= $urut === 'rating' ? 'selected' : '' ?>>Rating tertinggi</option>
+      <option value="rating" <?= $urut === 'rating' ? 'selected' : '' ?>>Rating Google tertinggi</option>
       <option value="murah" <?= $urut === 'murah' ? 'selected' : '' ?>>Harga termurah</option>
     </select>
     <?php if ($aktifFilter): ?><a href="/#pilih">Atur ulang</a><?php endif; ?>
@@ -549,7 +549,12 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
           <h3><?= esc($r['nama']) ?></h3>
           <span class="sub"><?= esc($r['kategori_khas']) ?><?= !empty($r['kecamatan']) ? ', ' . esc($r['kecamatan']) : '' ?></span>
           <div class="br-angka">
-            <span><b>&#9733; <?= esc($r['rating'] ?? '-') ?></b> <small><?= (int) ($r['jumlah_ulasan'] ?? 0) ?> ulasan</small></span>
+            <span><b>&#9733; <?= esc($r['rating'] ?? '-') ?></b> <small>Google (<?= (int) ($r['jumlah_ulasan'] ?? 0) ?>)</small></span>
+            <?php if (!empty($r['jumlah_ulasan_web'])): ?>
+              <span>&#9733; <?= esc(number_format((float) $r['rating_web'], 1)) ?> <small>pengunjung web (<?= (int) $r['jumlah_ulasan_web'] ?>)</small></span>
+            <?php else: ?>
+              <span><small>Belum ada ulasan web</small></span>
+            <?php endif; ?>
             <?php if ($max > 0): ?><span>Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
           </div>
           <?php if ($halal !== ''): ?>

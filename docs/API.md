@@ -125,7 +125,9 @@ Urut rating tertinggi.
 | `page` | Mulai 1 (bawaan 1) |
 | `per_page` | 1 sampai 50 (bawaan 20) |
 
-Setiap item: `id`, `nama`, `slug`, `alamat`, `kecamatan`, `lokasi` (`lat`, `lng`), `kategori`, `jenis_masakan`, `harga` (`min`, `max`, `catatan`), `rating`, `jumlah_ulasan`, `versi`, `info_halal`, `foto`.
+Setiap item: `id`, `nama`, `slug`, `alamat`, `kecamatan`, `lokasi` (`lat`, `lng`), `kategori`, `jenis_masakan`, `harga` (`min`, `max`, `catatan`), `rating`, `jumlah_ulasan`, `rating_web`, `jumlah_ulasan_web`, `versi`, `info_halal`, `foto`.
+
+Ada dua rating: `rating` dan `jumlah_ulasan` berasal dari **Google**; `rating_web` dan `jumlah_ulasan_web` dihitung dari ulasan **pengunjung web** (`rating_web` bernilai `null` kalau belum ada ulasan). Ulasan baru tidak mengubah rating Google.
 
 `meta`: `page`, `per_page`, `total`, `total_pages`.
 

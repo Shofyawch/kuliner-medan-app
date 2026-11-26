@@ -3,6 +3,7 @@
 namespace App\Controllers\Api\V1;
 
 use App\Controllers\BaseController;
+use App\Libraries\RatingWeb;
 use App\Models\MenuModel;
 use App\Models\RestoranModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -45,6 +46,8 @@ class Restoran extends BaseController
             ],
             'rating'        => (float) $r['rating'],
             'jumlah_ulasan' => (int) $r['jumlah_ulasan'],
+            'rating_web'        => $r['rating_web'] ?? null,
+            'jumlah_ulasan_web' => (int) ($r['jumlah_ulasan_web'] ?? 0),
             'versi'         => isset($r['versi']) ? (int) $r['versi'] : null,
             'info_halal'    => $r['info_halal'] ?? null,
             'foto'          => $r['link_foto'] ?? null,
@@ -86,7 +89,7 @@ class Restoran extends BaseController
 
         $rows = $model->orderBy('rating', 'DESC')->paginate($perPage, 'default', $page);
 
-        return $this->sukses(array_map([$this, 'format'], $rows), [
+        return $this->sukses(array_map([$this, 'format'], RatingWeb::tempel($rows)), [
             'page'        => $model->pager->getCurrentPage(),
             'per_page'    => $perPage,
             'total'       => $model->pager->getTotal(),
@@ -117,7 +120,7 @@ class Restoran extends BaseController
             ->query('SELECT * FROM restoran_terdekat(?, ?, ?, ?)', [(float) $lat, (float) $lng, $radius, $limit])
             ->getResultArray();
 
-        return $this->sukses(array_map([$this, 'format'], $rows), [
+        return $this->sukses(array_map([$this, 'format'], RatingWeb::tempel($rows)), [
             'pusat'     => ['lat' => (float) $lat, 'lng' => (float) $lng],
             'radius_km' => $radius,
             'jumlah'    => count($rows),
@@ -138,7 +141,7 @@ class Restoran extends BaseController
             ->orderBy('nama_menu')
             ->findAll();
 
-        $data = $this->format($r) + [
+        $data = $this->format(RatingWeb::tempel([$r])[0]) + [
             'deskripsi'     => $r['deskripsi'] ?? null,
             'no_telepon'    => $r['no_telepon'] ?? null,
             'link_maps'     => $r['link_maps'] ?? null,

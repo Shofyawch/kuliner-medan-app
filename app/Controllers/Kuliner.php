@@ -70,7 +70,7 @@ class Kuliner extends BaseController
             $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false);
         }
 
-        $restoran = $model->paginate(20);
+        $restoran = \App\Libraries\RatingWeb::tempel($model->paginate(20));
         $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'urut']);
 
         return view('kuliner/index', [
@@ -203,19 +203,8 @@ class Kuliner extends BaseController
                 $pesan = 'Terima kasih! Ulasan Anda berhasil ditambahkan.';
             }
 
-            // Hitung ulang rating & jumlah ulasan di restoran
-            $stat = $db->table('ulasan')
-                ->select('COUNT(*) AS total, AVG(rating) AS rata')
-                ->where('restoran_id', $restoran['id'])
-                ->get()->getRowArray();
-            if ($stat && (int) $stat['total'] > 0) {
-                $db->table('restoran')
-                    ->where('id', $restoran['id'])
-                    ->update([
-                        'rating'        => round((float) $stat['rata'], 1),
-                        'jumlah_ulasan' => (int) $stat['total'],
-                    ]);
-            }
+            // restoran.rating dan jumlah_ulasan berisi data Google, jadi tidak diubah di sini.
+            // Rating pengunjung web dihitung dari tabel ulasan (lihat App\Libraries\RatingWeb).
 
             return redirect()->to('/restoran/' . $slug)->with('success', $pesan);
         } catch (\Throwable $e) {

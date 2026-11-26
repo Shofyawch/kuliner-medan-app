@@ -229,7 +229,8 @@ async function muatDaftar() {
         <div class="isi">
           <h3>${h(x.nama)}</h3>
           <span class="sub">${h(x.kategori)} &middot; ${h(x.kecamatan)}</span>
-          <div class="bar"><span class="rating">&#9733; ${h(x.rating)} <small>(${h(x.jumlah_ulasan)})</small></span><span>${h(rupiah(x))}</span></div>
+          <div class="bar"><span class="rating">&#9733; ${h(x.rating)} <small>Google (${h(x.jumlah_ulasan)})</small></span><span>${h(rupiah(x))}</span></div>
+          <div class="sub">${x.jumlah_ulasan_web ? `&#9733; ${h(x.rating_web)} pengunjung web (${h(x.jumlah_ulasan_web)})` : 'Belum ada ulasan web'}</div>
           <div>${labelHalal(x.info_halal)}</div>
         </div>
       </a>`;
