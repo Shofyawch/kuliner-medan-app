@@ -6,12 +6,13 @@ Aplikasi untuk menjelajahi kuliner khas **Kota Medan**, terdiri dari satu REST A
 
 ## Fitur
 
-- Daftar restoran dengan pencarian, filter kategori, kecamatan, harga, dan urutan.
-- Detail restoran: menu, peta, ulasan, dan penginapan terdekat.
+- Daftar restoran dengan pencarian, filter kategori, kecamatan, harga, status halal, dan urutan.
+- Detail restoran: menu, peta interaktif, lightbox foto, tombol bagikan (WhatsApp & salin tautan), ulasan, dan penginapan terdekat.
 - Restoran terdekat dari titik patokan atau lokasi browser (jarak garis lurus).
-- Daftar penginapan dari API Singgah Medan.
-- Daftar akun, login, dan ulasan pengunjung.
-- Dashboard admin: kelola restoran dan menu, moderasi ulasan restoran dan penginapan.
+- Daftar penginapan dari API Singgah Medan beserta ulasan tamu dan kuliner terdekat.
+- Daftar akun, login, tulis/ubah/hapus ulasan pengunjung sendiri.
+- Halaman informasi: Tentang Kami, FAQ (dengan pencarian cepat), Hubungi Kami, dan Kebijakan & Ketentuan.
+- Dashboard admin: kelola restoran dan menu, moderasi ulasan restoran dan penginapan, serta pantau log integrasi API.
 
 ## Aplikasi dan alamat
 

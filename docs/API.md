@@ -50,6 +50,7 @@ Kolom **Akses** di bawah:
 | GET | `/hotel` | Admin | Daftar ringkas penginapan |
 | GET | `/hotel/ulasan` | Admin | Ulasan penginapan |
 | DELETE | `/hotel/ulasan/{id}` | Admin | Hapus ulasan penginapan |
+| GET | `/log-integrasi` | Admin | Riwayat pertukaran data API (`log_integrasi`) |
 
 ## Format respons
 
@@ -228,6 +229,12 @@ Data berasal dari API Singgah Medan (`HOTEL_API_URL`). Penghapusan berlaku di se
 - `GET /hotel`: `id` dan `nama` penginapan.
 - `GET /hotel/ulasan?hotel_id=&page=&per_page=`: `hotel_id` opsional, `per_page` bawaan 15. Setiap item: `id`, `hotel_id`, `hotel`, `penulis`, `rating`, `judul`, `isi`, `dibuat`.
 - `DELETE /hotel/ulasan/{id}?hotel_id=`
+
+## Log integrasi (admin)
+
+Mencatat riwayat permintaan data antar sistem (arah `masuk` pada endpoint `/api/*` dan `keluar` ke API Singgah Medan).
+
+- `GET /log-integrasi?arah=&page=&per_page=`: `arah` opsional (`masuk` atau `keluar`), `per_page` 1 sampai 50 (bawaan 20). Setiap item: `id`, `arah`, `endpoint`, `metode`, `parameter`, `status_code`, `jumlah_data`, `durasi_ms`, `keterangan`, `dibuat`.
 
 ## Contoh dengan curl
 
