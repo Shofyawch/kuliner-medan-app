@@ -57,7 +57,22 @@ foreach ($menu as $m) {
     <div class="detail-info">
       <span class="sub"><?= esc($r['kategori_khas']) ?> &middot; <?= esc($r['kecamatan']) ?></span>
       <h1><?= esc($r['nama']) ?></h1>
-      <p class="rating">&#9733; <?= esc($r['rating']) ?> <small>(<?= esc($r['jumlah_ulasan']) ?> ulasan)</small></p>
+      <?php
+        $totalUlasanUser = count($ulasan);
+        $rataUlasanUser  = $totalUlasanUser > 0
+            ? round(array_sum(array_map(static fn ($u) => (int) $u['rating'], $ulasan)) / $totalUlasanUser, 1)
+            : null;
+      ?>
+      <p class="rating" style="display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;">
+        <span>&#9733; <?= esc($r['rating']) ?> <small>(<?= esc($r['jumlah_ulasan']) ?> ulasan Google)</small></span>
+        <a href="#ulasan-pengguna" style="text-decoration:none;color:var(--marun);font-size:13.5px;background:#faf4ea;border:1px solid var(--garis);padding:2px 10px;border-radius:999px;">
+          <?php if ($totalUlasanUser > 0): ?>
+            &#9733; <?= esc($rataUlasanUser) ?> <small style="color:var(--abu)">(<?= $totalUlasanUser ?> ulasan pengguna)</small>
+          <?php else: ?>
+            <small style="color:var(--abu)">Belum ada ulasan pengguna</small>
+          <?php endif; ?>
+        </a>
+      </p>
       <p><?= esc($r['alamat']) ?></p>
       <p>
         <?php if ($max > 0): ?><span class="label">Rp <?= round($min / 1000) ?>&ndash;<?= round($max / 1000) ?> rb</span><?php endif; ?>
@@ -111,9 +126,14 @@ foreach ($menu as $m) {
   <?php endif; ?>
 
   <!-- Section Ulasan Pengunjung Restoran -->
-  <section class="panel">
+  <section class="panel" id="ulasan-pengguna">
     <h2>⭐ Ulasan Pengunjung</h2>
-    <p class="catatan">Pendapat dan pengalaman pengunjung di <?= esc($r['nama']) ?>.</p>
+    <p class="catatan">
+      Pendapat dan pengalaman pengguna Kuliner Khas Medan di <?= esc($r['nama']) ?>.
+      <?php if ($totalUlasanUser > 0): ?>
+        <strong style="color:var(--marun);margin-left:6px;">&#9733; <?= esc($rataUlasanUser) ?> / 5 (<?= $totalUlasanUser ?> ulasan pengguna)</strong>
+      <?php endif; ?>
+    </p>
 
     <?php if (empty($ulasan)): ?>
       <p style="color:var(--abu);">Belum ada ulasan untuk restoran ini. Jadilah yang pertama memberikan ulasan!</p>
