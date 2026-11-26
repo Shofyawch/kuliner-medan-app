@@ -7,7 +7,7 @@ class Auth extends BaseController
     public function login()
     {
         if (session()->has('pengguna_id')) {
-            return redirect()->to('/');
+            return redirect()->to(session()->get('role') === 'admin' ? '/admin' : '/');
         }
 
         return view('auth/login', [
@@ -44,6 +44,10 @@ class Auth extends BaseController
             'role'        => $user['role'],
             'isLoggedIn'  => true,
         ]);
+
+        if ($user['role'] === 'admin') {
+            return redirect()->to('/admin');
+        }
 
         return redirect()->to('/')->with('success', 'Selamat datang kembali, ' . $user['username'] . '!');
     }

@@ -79,3 +79,7 @@ $routes->match(['get', 'post', 'put', 'patch', 'delete'], 'api/v1/(:any)', stati
         'message' => 'Alamat API tidak ditemukan.',
     ]);
 });
+
+// ---- Dashboard Admin ----
+$routes->get('admin', 'Admin::index');
+$routes->post('admin/keluar', 'Admin::keluar');

@@ -16,6 +16,7 @@
       <a href="/" class="<?= $aktif === '' ? 'aktif' : '' ?>">Beranda</a>
       <a href="/terdekat" class="<?= $aktif === 'terdekat' ? 'aktif' : '' ?>">Terdekat</a>
       <a href="/hotel" class="<?= str_starts_with($aktif, 'hotel') ? 'aktif' : '' ?>">Penginapan</a>
+      <?php if (session()->get('role') === 'admin'): ?><a href="/admin">Admin</a><?php endif; ?>
       <?php if (session()->has('pengguna_id')): ?>
         <span class="nav-user">Halo, <b><?= esc(session()->get('username')) ?></b></span>
         <form method="post" action="/logout" class="nav-keluar-form">
