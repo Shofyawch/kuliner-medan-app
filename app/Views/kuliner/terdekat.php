@@ -82,7 +82,7 @@ $fmtJarak  = static fn ($j) => $j < 1 ? round($j * 1000) . ' m' : number_format(
           <p class="catatan">Belum ada restoran di radius ini. Coba perbesar radius atau pilih titik patokan lain.</p>
         <?php endif; ?>
         <?php foreach ($hasil as $r): ?>
-          <a href="/restoran/<?= esc($r['slug']) ?>">
+          <a href="/restoran/<?= esc($r['slug']) ?>" data-slug="<?= esc($r['slug']) ?>">
             <span><b><?= esc($r['nama']) ?></b><br>
               <span class="sub"><?= esc($r['kategori_khas']) ?> &middot; <?= esc($r['kecamatan']) ?> &middot; &#9733; <?= esc($r['rating']) ?></span></span>
             <span class="jarak"><?= $fmtJarak((float) $r['jarak_km']) ?></span>
@@ -137,6 +137,7 @@ var lingkaran = L.circle([asal.lat, asal.lng], {radius: asal.radius * 1000, colo
 L.circleMarker([asal.lat, asal.lng], {radius: 9, color: '#fff', weight: 2, fillColor: '#2f6f3e', fillOpacity: 1})
   .addTo(peta).bindTooltip(asal.nama);
 
+var penanda = {};
 data.forEach(function (r) {
   var j = parseFloat(r.jarak_km);
   var teksJarak = j < 1 ? Math.round(j * 1000) + ' m' : j.toFixed(1).replace('.', ',') + ' km';
@@ -163,8 +164,18 @@ data.forEach(function (r) {
     .addTo(peta)
     .bindPopup(el, { maxWidth: 230 });
   marker.on('mouseover', function () { this.openPopup(); });
+  penanda[r.slug] = marker;
 });
 peta.fitBounds(lingkaran.getBounds(), {padding: [20, 20]});
+
+document.querySelectorAll('.daftar.sekitar a[data-slug]').forEach(function (item) {
+  var buka = function () {
+    var m = penanda[item.getAttribute('data-slug')];
+    if (m) m.openPopup();
+  };
+  item.addEventListener('mouseenter', buka);
+  item.addEventListener('focus', buka);
+});
 
 var wadah = document.getElementById('dua-kolom');
 var tabs = document.querySelectorAll('.tab-hp button');
