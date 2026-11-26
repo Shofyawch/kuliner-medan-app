@@ -2,31 +2,38 @@
 
 namespace App\Controllers;
 
+use App\Libraries\HotelService;
+use App\Libraries\RatingWeb;
 use App\Models\MenuModel;
 use App\Models\RestoranModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Kuliner extends BaseController
 {
+    private const FILTER_HARGA = ['murah', 'sedang', 'mahal'];
+    private const OPSI_URUT    = ['rating', 'harga'];
+
     public function index()
     {
-        $ambil = function (string $nama): ?string {
-            $v = $this->request->getGet($nama);
-            return is_string($v) && $v !== '' ? $v : null;
-        };
+        // ---------- baca parameter ----------
+        $kategori  = $this->ambilTeks('kategori');
+        $cari      = $this->ambilTeks('q');
+        $kecamatan = $this->ambilTeks('kecamatan');
+        $harga     = $this->ambilTeks('harga');
 
-        $kategori  = $ambil('kategori');
-        $cari      = $ambil('q');
-        $kecamatan = $ambil('kecamatan');
-        $harga     = $ambil('harga');
-
-        if (!in_array($harga, ['murah', 'sedang', 'mahal'], true)) {
+        if (!in_array($harga, self::FILTER_HARGA, true)) {
             $harga = null;
         }
-        $urut = (array) $this->request->getGet('urut');
-        $urut = array_values(array_intersect($urut, ['rating', 'harga']));
 
+        // urut bisa lebih dari satu: ?urut[]=rating&urut[]=harga
+        $urut = array_values(array_intersect(
+            (array) $this->request->getGet('urut'),
+            self::OPSI_URUT
+        ));
+
+        // ---------- data pendukung filter ----------
         $db = db_connect();
+
         $daftarKategori = $db->table('restoran')
             ->select('kategori_khas, COUNT(*) AS jumlah')
             ->groupBy('kategori_khas')
@@ -40,7 +47,9 @@ class Kuliner extends BaseController
             ->orderBy('kecamatan')
             ->get()->getResultArray();
 
+        // ---------- query restoran ----------
         $model = new RestoranModel();
+
         if ($kategori) {
             $model->where('kategori_khas', $kategori);
         }
@@ -50,29 +59,11 @@ class Kuliner extends BaseController
         if ($kecamatan) {
             $model->where('kecamatan', $kecamatan);
         }
-        if ($harga === 'murah') {
-            $model->where('harga_max <=', 25000);
-        } elseif ($harga === 'sedang') {
-            $model->where('harga_max >', 25000)->where('harga_max <=', 60000);
-        } elseif ($harga === 'mahal') {
-            $model->where('harga_max >', 60000);
-        }
 
-        if (in_array('rating', $urut, true)) {
-    $model->orderBy('COALESCE(rating,0)', 'DESC', false)
-          ->orderBy('COALESCE(jumlah_ulasan,0)', 'DESC', false);
-}
-if (in_array('harga', $urut, true)) {
-    $model->orderBy('COALESCE(harga_min,999999999)', 'ASC', false);
-}
-if (empty($urut)) {
-    // "Paling cocok" (default)
-    $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false);
-} else {
-    $model->orderBy('nama', 'ASC'); // pembeda terakhir supaya urutan stabil
-}
+        $this->terapkanFilterHarga($model, $harga);
+        $this->terapkanUrutan($model, $urut);
 
-        $restoran = \App\Libraries\RatingWeb::tempel($model->paginate(20));
+        $restoran = RatingWeb::tempel($model->paginate(20));
         $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'urut']);
 
         return view('kuliner/index', [
@@ -101,32 +92,32 @@ if (empty($urut)) {
             ->orderBy('nama_menu')
             ->findAll();
 
-        $sekitar = [];
+        $db           = db_connect();
+        $sekitar      = [];
         $hotelSekitar = [];
+
         if (is_numeric($restoran['latitude']) && is_numeric($restoran['longitude'])) {
-            $semua = db_connect()
-                ->query('SELECT * FROM restoran_terdekat(?, ?, ?, ?)', [
-                    (float) $restoran['latitude'],
-                    (float) $restoran['longitude'],
-                    2.0,
-                    8,
-                ])->getResultArray();
-            $semua   = array_filter($semua, static fn($x) => $x['slug'] !== $slug);
+            $lat = (float) $restoran['latitude'];
+            $lng = (float) $restoran['longitude'];
+
+            // restoran lain di sekitar (radius 2 km), tanpa restoran ini sendiri
+            $semua = $db
+                ->query('SELECT * FROM restoran_terdekat(?, ?, ?, ?)', [$lat, $lng, 2.0, 8])
+                ->getResultArray();
+            $semua   = array_filter($semua, static fn ($x) => $x['slug'] !== $slug);
             $sekitar = array_slice(array_values($semua), 0, 5);
 
-            // Ambil hotel terdekat dari API Singgah Medan menggunakan koordinat GPS & kecamatan restoran
-            $hotelService = new \App\Libraries\HotelService();
-            $hotelSekitar = $hotelService->getHotelsNear(
-                (float) $restoran['latitude'],
-                (float) $restoran['longitude'],
+            // hotel terdekat dari API Singgah Medan
+            $hotelSekitar = (new HotelService())->getHotelsNear(
+                $lat,
+                $lng,
                 $restoran['kecamatan'] ?? null,
                 5.0,
                 4
             );
         }
 
-        // Ambil ulasan dari v_ulasan
-        $db = db_connect();
+        // semua ulasan restoran ini
         $ulasan = [];
         try {
             $ulasan = $db->table('v_ulasan')
@@ -137,7 +128,7 @@ if (empty($urut)) {
             log_message('error', 'Gagal memuat ulasan: ' . $e->getMessage());
         }
 
-        // Cek ulasan pengguna saat ini
+        // ulasan milik pengguna yang sedang login
         $ulasanSaya = null;
         $penggunaId = session()->get('pengguna_id');
         if ($penggunaId) {
@@ -147,6 +138,7 @@ if (empty($urut)) {
                     ->where('pengguna_id', $penggunaId)
                     ->get()->getRowArray();
             } catch (\Throwable $e) {
+                log_message('error', 'Gagal memuat ulasan pengguna: ' . $e->getMessage());
             }
         }
 
@@ -173,29 +165,32 @@ if (empty($urut)) {
             throw PageNotFoundException::forPageNotFound();
         }
 
+        $balik    = '/restoran/' . $slug;
         $rating   = (int) $this->request->getPost('rating');
         $komentar = trim((string) $this->request->getPost('komentar'));
 
         if ($rating < 1 || $rating > 5) {
-            return redirect()->to('/restoran/' . $slug)->with('error', 'Rating wajib antara 1 sampai 5.');
+            return redirect()->to($balik)->with('error', 'Rating wajib antara 1 sampai 5.');
         }
         if (mb_strlen($komentar) > 500) {
-            return redirect()->to('/restoran/' . $slug)->with('error', 'Komentar maksimal 500 karakter.');
+            return redirect()->to($balik)->with('error', 'Komentar maksimal 500 karakter.');
         }
 
-        $db = db_connect();
+        $komentar = $komentar !== '' ? $komentar : null;
+        $db       = db_connect();
+
         try {
-            $existing = $db->table('ulasan')
+            $sudahAda = $db->table('ulasan')
                 ->where('restoran_id', $restoran['id'])
                 ->where('pengguna_id', $penggunaId)
                 ->get()->getRowArray();
 
-            if ($existing) {
+            if ($sudahAda) {
                 $db->table('ulasan')
-                    ->where('id', $existing['id'])
+                    ->where('id', $sudahAda['id'])
                     ->update([
                         'rating'     => $rating,
-                        'komentar'   => $komentar !== '' ? $komentar : null,
+                        'komentar'   => $komentar,
                         'updated_at' => date('Y-m-d H:i:s'),
                     ]);
                 $pesan = 'Ulasan Anda berhasil diperbarui!';
@@ -204,7 +199,7 @@ if (empty($urut)) {
                     'restoran_id' => $restoran['id'],
                     'pengguna_id' => $penggunaId,
                     'rating'      => $rating,
-                    'komentar'    => $komentar !== '' ? $komentar : null,
+                    'komentar'    => $komentar,
                 ]);
                 $pesan = 'Terima kasih! Ulasan Anda berhasil ditambahkan.';
             }
@@ -212,10 +207,61 @@ if (empty($urut)) {
             // restoran.rating dan jumlah_ulasan berisi data Google, jadi tidak diubah di sini.
             // Rating pengunjung web dihitung dari tabel ulasan (lihat App\Libraries\RatingWeb).
 
-            return redirect()->to('/restoran/' . $slug)->with('success', $pesan);
+            return redirect()->to($balik)->with('success', $pesan);
         } catch (\Throwable $e) {
             log_message('error', 'Gagal simpan ulasan: ' . $e->getMessage());
-            return redirect()->to('/restoran/' . $slug)->with('error', 'Gagal menyimpan ulasan.');
+            return redirect()->to($balik)->with('error', 'Gagal menyimpan ulasan.');
         }
+    }
+
+    // ------------------------------------------------------------------
+    //  Helper privat
+    // ------------------------------------------------------------------
+
+    /** Ambil parameter GET berupa teks; kosong atau bukan string menjadi null. */
+    private function ambilTeks(string $nama): ?string
+    {
+        $v = $this->request->getGet($nama);
+
+        return is_string($v) && $v !== '' ? $v : null;
+    }
+
+    /** Filter rentang harga berdasarkan harga_max. */
+    private function terapkanFilterHarga(RestoranModel $model, ?string $harga): void
+    {
+        match ($harga) {
+            'murah'  => $model->where('harga_max <=', 25000),
+            'sedang' => $model->where('harga_max >', 25000)->where('harga_max <=', 60000),
+            'mahal'  => $model->where('harga_max >', 60000),
+            default  => null,
+        };
+    }
+
+    /**
+     * Urutan hasil. Kalau rating dan harga sama-sama dipilih,
+     * rating jadi prioritas pertama, harga pembeda berikutnya.
+     * Kosong = "Paling cocok" (skor rating tertimbang).
+     */
+    private function terapkanUrutan(RestoranModel $model, array $urut): void
+    {
+        if ($urut === []) {
+            $model->orderBy(
+                '(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)',
+                'DESC',
+                false
+            );
+            return;
+        }
+
+        if (in_array('rating', $urut, true)) {
+            $model->orderBy('COALESCE(rating,0)', 'DESC', false)
+                ->orderBy('COALESCE(jumlah_ulasan,0)', 'DESC', false);
+        }
+        if (in_array('harga', $urut, true)) {
+            $model->orderBy('COALESCE(harga_min,999999999)', 'ASC', false);
+        }
+
+        // pembeda terakhir supaya urutan stabil antar halaman
+        $model->orderBy('nama', 'ASC');
     }
 }
