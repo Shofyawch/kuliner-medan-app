@@ -24,8 +24,9 @@ $routes->get('daftar', 'Auth::daftar');
 $routes->post('daftar', 'Auth::prosesDaftar');
 $routes->post('logout', 'Auth::logout');
 
-// ---- Kirim Ulasan Restoran Web ----
+// ---- Kirim & Hapus Ulasan Restoran Web ----
 $routes->post('restoran/(:segment)/ulasan', 'Kuliner::simpanUlasan/$1');
+$routes->post('restoran/(:segment)/ulasan/hapus', 'Kuliner::hapusUlasan/$1');
 
 
 // ---- API v1 ----

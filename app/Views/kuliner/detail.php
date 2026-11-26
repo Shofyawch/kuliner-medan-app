@@ -182,10 +182,22 @@ foreach ($menu as $m) {
             <textarea name="komentar" id="komentar" rows="3" placeholder="Ceritakan rasa masakan, suasana, atau pelayanan di sini... (maks 500 karakter)" style="width:100%;max-width:600px;padding:9px 12px;border:1px solid var(--garis);border-radius:8px;font-family:inherit;font-size:14px;" maxlength="500"><?= esc($ulasanSaya['komentar'] ?? '') ?></textarea>
           </div>
 
-          <button type="submit" class="tombol">
-            <?= $ulasanSaya ? 'Perbarui Ulasan' : 'Kirim Ulasan' ?>
-          </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <button type="submit" class="tombol">
+              <?= $ulasanSaya ? 'Perbarui Ulasan' : 'Kirim Ulasan' ?>
+            </button>
+            <?php if ($ulasanSaya): ?>
+              <button type="submit" form="form-hapus-ulasan" class="tombol-sekunder" style="color:#b3261e;border-color:#e8b9b5;">
+                Hapus Ulasan Saya
+              </button>
+            <?php endif; ?>
+          </div>
         </form>
+        <?php if ($ulasanSaya): ?>
+          <form id="form-hapus-ulasan" method="post" action="/restoran/<?= esc($r['slug']) ?>/ulasan/hapus" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ulasan Anda?');" hidden>
+            <?= csrf_field() ?>
+          </form>
+        <?php endif; ?>
       <?php else: ?>
         <div style="text-align:center;padding:12px;">
           <p style="margin:0 0 8px;font-weight:600;">Ingin menulis ulasan untuk restoran ini?</p>

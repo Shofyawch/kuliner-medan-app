@@ -221,6 +221,38 @@ class Kuliner extends BaseController
         }
     }
 
+    public function hapusUlasan(string $slug)
+    {
+        $penggunaId = session()->get('pengguna_id');
+        if (!$penggunaId) {
+            return redirect()->to('/login')->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
+        $restoran = (new RestoranModel())->where('slug', $slug)->first();
+        if ($restoran === null) {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $balik = '/restoran/' . $slug . '#ulasan-pengguna';
+        $db    = db_connect();
+
+        try {
+            $db->table('ulasan')
+                ->where('restoran_id', $restoran['id'])
+                ->where('pengguna_id', (int) $penggunaId)
+                ->delete();
+
+            if ($db->affectedRows() === 0) {
+                return redirect()->to($balik)->with('error', 'Ulasan tidak ditemukan atau bukan milik Anda.');
+            }
+
+            return redirect()->to($balik)->with('success', 'Ulasan Anda berhasil dihapus.');
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal hapus ulasan: ' . $e->getMessage());
+            return redirect()->to($balik)->with('error', 'Gagal menghapus ulasan.');
+        }
+    }
+
     // ------------------------------------------------------------------
     //  Helper privat
     // ------------------------------------------------------------------
