@@ -286,7 +286,8 @@
       <h1 style="margin-bottom:0">Dashboard Admin</h1>
       <nav class="tab">
         <button class="aktif" data-aksi="tab" data-nama="restoran">Restoran</button>
-        <button data-aksi="tab" data-nama="ulasan">Ulasan (moderasi)</button>
+        <button data-aksi="tab" data-nama="ulasan">Ulasan Restoran</button>
+        <button data-aksi="tab" data-nama="hotel-ulasan">Ulasan Penginapan</button>
       </nav>
 
       <div id="tab-restoran">
@@ -330,6 +331,31 @@
           </table>
         </div>
         <div id="pg-ulasan" class="pager"></div>
+      </div>
+
+      <div id="tab-hotel-ulasan" hidden>
+        <div class="baris">
+          <select id="filter-hotel" aria-label="Filter penginapan" style="max-width:340px">
+            <option value="">Semua penginapan</option>
+          </select>
+          <button type="button" data-aksi="hotel-muat">Muat ulang</button>
+        </div>
+        <p id="info-hotel-ulasan" class="info"></p>
+        <div class="gulir">
+          <table>
+            <thead>
+              <tr>
+                <th>Penginapan</th>
+                <th>Penulis</th>
+                <th>Rating</th>
+                <th>Ulasan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tb-hotel-ulasan"></tbody>
+          </table>
+        </div>
+        <div id="pg-hotel-ulasan" class="pager"></div>
       </div>
     </section>
   </main>
@@ -412,6 +438,11 @@
       ulasan: {
         page: 1,
         total_pages: 1
+      },
+      'hotel-ulasan': {
+        page: 1,
+        total_pages: 1,
+        hotelLoaded: false
       },
       menu: [],
       menuRestoran: null
@@ -724,13 +755,60 @@
       }
     }
 
+    /* ---------- moderasi ulasan penginapan ---------- */
+    async function muatFilterHotel() {
+      if (st['hotel-ulasan'].hotelLoaded) return;
+      try {
+        const r = await api('GET', '/hotel');
+        const sel = $('#filter-hotel');
+        sel.innerHTML = '<option value="">Semua penginapan</option>' +
+          (r.data || []).map((x) => `<option value="${h(x.id)}">${h(x.nama)}</option>`).join('');
+        st['hotel-ulasan'].hotelLoaded = true;
+      } catch (e) { /* abaikan jika daftar hotel gagal dimuat */ }
+    }
+    async function muatHotelUlasan() {
+      await muatFilterHotel();
+      const hid = $('#filter-hotel').value;
+      const qs = 'per_page=15&page=' + st['hotel-ulasan'].page + (hid ? '&hotel_id=' + encodeURIComponent(hid) : '');
+      $('#tb-hotel-ulasan').innerHTML = '<tr><td colspan="5">Memuat ulasan penginapan...</td></tr>';
+      try {
+        const r = await api('GET', '/hotel/ulasan?' + qs);
+        st['hotel-ulasan'].total_pages = r.meta.total_pages || 1;
+        $('#info-hotel-ulasan').textContent = r.meta.total + ' ulasan penginapan (API Singgah Medan)';
+        $('#tb-hotel-ulasan').innerHTML = r.data.map((u) => `
+      <tr>
+        <td><b>${h(u.hotel)}</b></td>
+        <td>${h(u.penulis)}</td>
+        <td class="bintang">${'&#9733;'.repeat(Math.max(0, Math.min(5, Number(u.rating) || 0)))}</td>
+        <td>${u.judul ? `<b>${h(u.judul)}</b><br>` : ''}${h(u.isi || '-')}<br><small>${h(u.dibuat)}</small></td>
+        <td class="aksi"><button class="bahaya" data-aksi="hotel-ulasan-hapus" data-id="${h(u.id)}" data-hotel-id="${h(u.hotel_id)}">Hapus</button></td>
+      </tr>`).join('') || '<tr><td colspan="5">Belum ada ulasan penginapan.</td></tr>';
+        gambarPager('hotel-ulasan');
+      } catch (e) {
+        $('#tb-hotel-ulasan').innerHTML = `<tr><td colspan="5" class="galat">${h(pesanGalat(e))}</td></tr>`;
+        toast(pesanGalat(e));
+      }
+    }
+    async function hapusHotelUlasan(id, hotelId) {
+      if (!confirm('Hapus ulasan penginapan ini dari server Singgah Medan?')) return;
+      try {
+        await api('DELETE', '/hotel/ulasan/' + id + (hotelId ? '?hotel_id=' + encodeURIComponent(hotelId) : ''));
+        toast('Ulasan penginapan dihapus.');
+        muatHotelUlasan();
+      } catch (e) {
+        toast(pesanGalat(e));
+      }
+    }
+
     /* ---------- penghubung klik ---------- */
     const aksi = {
       tab: (d) => {
         document.querySelectorAll('.tab button').forEach((b) => b.classList.toggle('aktif', b.dataset.nama === d.nama));
         $('#tab-restoran').hidden = d.nama !== 'restoran';
         $('#tab-ulasan').hidden = d.nama !== 'ulasan';
+        $('#tab-hotel-ulasan').hidden = d.nama !== 'hotel-ulasan';
         if (d.nama === 'ulasan') muatUlasan();
+        else if (d.nama === 'hotel-ulasan') muatHotelUlasan();
         else muatRestoran();
       },
       tambah: () => bukaFormRestoran(null),
@@ -741,10 +819,13 @@
       'menu-hapus': (d) => hapusMenu(d.id),
       'menu-baru': () => kosongkanFormMenu(),
       'ulasan-hapus': (d) => hapusUlasan(d.id),
+      'hotel-ulasan-hapus': (d) => hapusHotelUlasan(d.id, d.hotelId),
+      'hotel-muat': () => muatHotelUlasan(),
       hal: (d) => {
         st[d.tab].page = Math.max(1, Number(d.ke));
         if (d.tab === 'restoran') muatRestoran();
-        else muatUlasan();
+        else if (d.tab === 'ulasan') muatUlasan();
+        else muatHotelUlasan();
       },
       tutup: (d) => document.getElementById(d.dlg).close(),
     };
@@ -758,6 +839,10 @@
       ev.preventDefault();
       st.restoran.page = 1;
       muatRestoran();
+    });
+    $('#filter-hotel').addEventListener('change', () => {
+      st['hotel-ulasan'].page = 1;
+      muatHotelUlasan();
     });
 
     muatRestoran();
