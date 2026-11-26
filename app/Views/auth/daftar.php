@@ -24,12 +24,22 @@
 
       <div style="margin-bottom: 16px;">
         <label for="password" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Password</label>
-        <input type="password" id="password" name="password" placeholder="Minimal 8 karakter" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" minlength="8" required>
+        <div class="input-sandi-wrap">
+          <input type="password" id="password" name="password" placeholder="Minimal 8 karakter" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" minlength="8" required>
+          <button type="button" class="btn-sandi" data-toggle-sandi="password" aria-pressed="false" aria-label="Tampilkan password" title="Tampilkan password">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
 
       <div style="margin-bottom: 22px;">
         <label for="konfirmasi" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Ulangi Password</label>
-        <input type="password" id="konfirmasi" name="konfirmasi" placeholder="Ketik ulang password" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" required>
+        <div class="input-sandi-wrap">
+          <input type="password" id="konfirmasi" name="konfirmasi" placeholder="Ketik ulang password" style="width: 100%; padding: 11px 14px; border: 1px solid var(--garis); border-radius: 10px; font-size: 15px; font-family: inherit;" required>
+          <button type="button" class="btn-sandi" data-toggle-sandi="konfirmasi" aria-pressed="false" aria-label="Tampilkan password" title="Tampilkan password">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="tombol" style="width: 100%; padding: 12px; font-size: 16px; border: 0; cursor: pointer;">

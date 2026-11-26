@@ -225,3 +225,10 @@ button.tombol:disabled{opacity:.6;cursor:wait}
 .daftar-polos{margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
 .halaman-info .panel h2{margin-top:18px;font-size:19px}
 .halaman-info .panel h2:first-child{margin-top:0}
+
+.input-sandi-wrap{position:relative;display:flex;align-items:center}
+.input-sandi-wrap input{padding-right:44px !important}
+.btn-sandi{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--abu);cursor:pointer;padding:6px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;transition:color .15s,background .15s}
+.btn-sandi:hover{color:var(--marun);background:rgba(107,18,28,.08)}
+.btn-sandi:focus-visible{outline:2px solid var(--emas);outline-offset:1px}
+.btn-sandi[aria-pressed="true"]{color:var(--marun)}

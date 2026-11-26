@@ -141,6 +141,18 @@
       selesai();
     }
   });
+
+  document.addEventListener('click', function (ev) {
+    var btn = ev.target.closest('[data-toggle-sandi]');
+    if (!btn) return;
+    var input = document.getElementById(btn.getAttribute('data-toggle-sandi'));
+    if (!input) return;
+    var tampil = input.type === 'password';
+    input.type = tampil ? 'text' : 'password';
+    btn.setAttribute('aria-pressed', tampil ? 'true' : 'false');
+    btn.setAttribute('aria-label', tampil ? 'Sembunyikan password' : 'Tampilkan password');
+    btn.title = tampil ? 'Sembunyikan password' : 'Tampilkan password';
+  });
 })();
 </script>
 <?= $this->renderSection('skrip') ?>
