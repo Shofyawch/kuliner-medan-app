@@ -125,6 +125,19 @@ footer.dasar p{margin:4px 0}
 .detail-info p{margin:7px 0}
 .tombol{display:inline-block;padding:11px 20px;border-radius:10px;background:var(--marun);color:#fff;text-decoration:none;font-weight:600;font-size:14.5px;transition:background .2s,transform .15s;box-shadow:0 3px 10px rgba(110,27,38,.2)}
 .tombol:hover{background:var(--marun-gelap);transform:translateY(-1px)}
+.aksi-detail{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.tombol-sekunder{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--putih);color:var(--marun);border:1px solid var(--garis);text-decoration:none;font-weight:600;font-size:14px;font-family:inherit;cursor:pointer;transition:all .18s}
+.tombol-sekunder:hover{border-color:var(--marun);background:#faf4ea;transform:translateY(-1px)}
+.foto-besar img,.menu-foto{cursor:zoom-in}
+
+/* Tombol kembali ke atas & Lightbox foto */
+.btn-atas{position:fixed;right:20px;bottom:22px;width:44px;height:44px;border-radius:999px;border:2px solid var(--emas);background:var(--marun);color:#fff;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 6px 20px rgba(48,24,14,.28);z-index:45;transition:transform .18s,background .18s}
+.btn-atas:hover{background:var(--marun-gelap);transform:translateY(-2px)}
+dialog.lightbox{border:0;padding:0;background:transparent;max-width:92vw;max-height:90vh;overflow:visible}
+dialog.lightbox::backdrop{background:rgba(20,12,10,.82);backdrop-filter:blur(4px)}
+dialog.lightbox img{display:block;max-width:92vw;max-height:86vh;border-radius:14px;box-shadow:0 18px 48px rgba(0,0,0,.45);object-fit:contain}
+.lightbox-tutup{position:absolute;top:-14px;right:-14px;width:34px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:var(--marun-gelap);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lightbox-tutup:hover{background:var(--marun)}
 
 .panel{background:var(--putih);border:1px solid var(--garis);border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:var(--bayangan)}
 .panel h2{margin:0 0 6px;font-size:22px;color:var(--teks)}

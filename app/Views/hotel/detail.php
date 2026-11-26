@@ -59,13 +59,15 @@ $fmtJarak = static fn ($j) => $j < 1 ? round($j * 1000) . ' m' : number_format($
         <?php endif; ?>
       </p>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+      <div class="aksi-detail">
         <?php if (!empty($h['url'])): ?>
           <a class="tombol" href="<?= esc($h['url'], 'attr') ?>" target="_blank" rel="noopener">Kunjungi Halaman Asli</a>
         <?php endif; ?>
         <?php if ($lat && $lng): ?>
           <a class="tombol" style="background:#2f6f3e;" href="https://www.google.com/maps/search/?api=1&query=<?= $lat ?>,<?= $lng ?>" target="_blank" rel="noopener">Petunjuk Arah Maps</a>
         <?php endif; ?>
+        <button type="button" class="tombol-sekunder" data-salin-link>Salin Link</button>
+        <a class="tombol-sekunder" href="https://wa.me/?text=<?= rawurlencode('Cek penginapan ' . $h['nama'] . ' di Kuliner Khas Medan: ' . current_url()) ?>" target="_blank" rel="noopener">Bagikan WA</a>
       </div>
     </div>
   </div>

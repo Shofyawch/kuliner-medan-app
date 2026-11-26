@@ -11,6 +11,7 @@ use CodeIgniter\Exceptions\PageNotFoundException;
 class Kuliner extends BaseController
 {
     private const FILTER_HARGA = ['murah', 'sedang', 'mahal'];
+    private const FILTER_HALAL = ['halal', 'belum', 'nonhalal'];
     private const OPSI_URUT    = ['rating', 'harga'];
 
     public function index()
@@ -20,9 +21,13 @@ class Kuliner extends BaseController
         $cari      = $this->ambilTeks('q');
         $kecamatan = $this->ambilTeks('kecamatan');
         $harga     = $this->ambilTeks('harga');
+        $halal     = $this->ambilTeks('halal');
 
         if (!in_array($harga, self::FILTER_HARGA, true)) {
             $harga = null;
+        }
+        if (!in_array($halal, self::FILTER_HALAL, true)) {
+            $halal = null;
         }
 
         // urut bisa lebih dari satu: ?urut[]=rating&urut[]=harga
@@ -61,10 +66,11 @@ class Kuliner extends BaseController
         }
 
         $this->terapkanFilterHarga($model, $harga);
+        $this->terapkanFilterHalal($model, $halal);
         $this->terapkanUrutan($model, $urut);
 
         $restoran = RatingWeb::tempel($model->paginate(20));
-        $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'urut']);
+        $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'halal', 'urut']);
 
         return view('kuliner/index', [
             'restoran'        => $restoran,
@@ -75,6 +81,7 @@ class Kuliner extends BaseController
             'cari'            => $cari,
             'kecamatan'       => $kecamatan,
             'harga'           => $harga,
+            'halal'           => $halal,
             'urut'            => $urut,
         ]);
     }
@@ -224,6 +231,17 @@ class Kuliner extends BaseController
         $v = $this->request->getGet($nama);
 
         return is_string($v) && $v !== '' ? $v : null;
+    }
+
+    /** Filter status halal berdasarkan info_halal. */
+    private function terapkanFilterHalal(RestoranModel $model, ?string $halal): void
+    {
+        match ($halal) {
+            'halal'    => $model->like('info_halal', 'Halal', 'after', null, true),
+            'nonhalal' => $model->like('info_halal', 'Non', 'after', null, true),
+            'belum'    => $model->like('info_halal', 'belum', 'both', null, true),
+            default    => null,
+        };
     }
 
     /** Filter rentang harga berdasarkan harga_max. */

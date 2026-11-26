@@ -84,6 +84,59 @@
     </div>
   </div>
 </footer>
+
+<button id="btn-atas" class="btn-atas" type="button" aria-label="Kembali ke atas" title="Kembali ke atas" hidden>&uarr;</button>
+
+<dialog id="lightbox" class="lightbox" aria-label="Pratinjau foto">
+  <button type="button" class="lightbox-tutup" aria-label="Tutup">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</dialog>
+
+<script>
+(function () {
+  var btnAtas = document.getElementById('btn-atas');
+  if (btnAtas) {
+    var cekScroll = function () { btnAtas.hidden = window.scrollY < 320; };
+    window.addEventListener('scroll', cekScroll, { passive: true });
+    cekScroll();
+    btnAtas.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lightbox-img');
+  if (lb && lbImg) {
+    document.addEventListener('click', function (ev) {
+      var img = ev.target.closest('.foto-besar img, .menu-foto');
+      if (img && img.src) {
+        lbImg.src = img.src;
+        lbImg.alt = img.alt || '';
+        lb.showModal();
+        return;
+      }
+      if (ev.target === lb || ev.target.closest('.lightbox-tutup')) {
+        lb.close();
+      }
+    });
+  }
+
+  document.addEventListener('click', function (ev) {
+    var btn = ev.target.closest('[data-salin-link]');
+    if (!btn) return;
+    var teksAsli = btn.textContent;
+    var selesai = function () {
+      btn.textContent = 'Link tersalin!';
+      setTimeout(function () { btn.textContent = teksAsli; }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(window.location.href).then(selesai).catch(selesai);
+    } else {
+      selesai();
+    }
+  });
+})();
+</script>
 <?= $this->renderSection('skrip') ?>
 </body>
 </html>

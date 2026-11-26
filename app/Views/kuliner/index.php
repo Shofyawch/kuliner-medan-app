@@ -561,6 +561,7 @@ $param = array_filter([
   'q' => $cari,
   'kecamatan' => $kecamatan,
   'harga' => $harga,
+  'halal' => $halal ?? null,
   'urut' => $urutDipilih,
 ]);
 $aktifFilter = $kategori || $param;
@@ -648,6 +649,13 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
       <option value="murah" <?= $harga === 'murah' ? 'selected' : '' ?>>Murah (sampai Rp 25 rb)</option>
       <option value="sedang" <?= $harga === 'sedang' ? 'selected' : '' ?>>Sedang (Rp 25&ndash;60 rb)</option>
       <option value="mahal" <?= $harga === 'mahal' ? 'selected' : '' ?>>Mahal (di atas Rp 60 rb)</option>
+    </select>
+
+    <select name="halal" form="form-cari" aria-label="Status halal">
+      <option value="">Semua status halal</option>
+      <option value="halal" <?= ($halal ?? null) === 'halal' ? 'selected' : '' ?>>Halal</option>
+      <option value="belum" <?= ($halal ?? null) === 'belum' ? 'selected' : '' ?>>Belum dicek</option>
+      <option value="nonhalal" <?= ($halal ?? null) === 'nonhalal' ? 'selected' : '' ?>>Non-halal</option>
     </select>
 
     <details class="multi" id="urut-multi">
