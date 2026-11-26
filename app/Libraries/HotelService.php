@@ -233,6 +233,40 @@ class HotelService
     }
 
     /**
+     * Ambil daftar ulasan hotel untuk moderasi admin (opsional filter per hotel)
+     */
+    public function getAllReviews(?int $hotelId = null, int $page = 1, int $limit = 15): array
+    {
+        $params = ['page' => $page, 'limit' => $limit];
+        if ($hotelId !== null && $hotelId > 0) {
+            $params['hotel_id'] = $hotelId;
+        }
+
+        $res = $this->request('reviews', 'GET', $params);
+        if (!is_array($res)) {
+            return [
+                'status' => 'error',
+                'data'   => [],
+                'meta'   => ['page' => $page, 'limit' => $limit, 'total' => 0, 'total_pages' => 1],
+            ];
+        }
+
+        $data = is_array($res['data'] ?? null) ? $res['data'] : [];
+        $meta = is_array($res['meta'] ?? null) ? $res['meta'] : [
+            'page'        => $page,
+            'limit'       => $limit,
+            'total'       => count($data),
+            'total_pages' => 1,
+        ];
+
+        return [
+            'status' => $res['status'] ?? 'ok',
+            'data'   => $data,
+            'meta'   => $meta,
+        ];
+    }
+
+    /**
      * Kirim ulasan baru ke server Singgah Medan
      */
     public function createReview(int $hotelId, int $rating, string $judul, string $isi, int $userId): ?array
@@ -256,11 +290,13 @@ class HotelService
     /**
      * Hapus ulasan dari server Singgah Medan
      */
-    public function deleteReview(int $reviewId, int $hotelId): ?array
+    public function deleteReview(int $reviewId, int $hotelId = 0): ?array
     {
         $res = $this->request("reviews/{$reviewId}", 'DELETE');
         if ($res && ($res['status'] ?? '') === 'ok') {
-            $this->deleteCache('hotel_detail_' . $hotelId);
+            if ($hotelId > 0) {
+                $this->deleteCache('hotel_detail_' . $hotelId);
+            }
             return $res;
         }
         return null;
