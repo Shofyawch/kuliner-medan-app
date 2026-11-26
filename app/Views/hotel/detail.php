@@ -1,3 +1,12 @@
+<?php
+/**
+ * @var array $h
+ * @var array|null $kulinerSekitar
+ * @var array|null $ulasan
+ */
+?>
+<?= $this->extend('layouts/main') ?>
+
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('head') ?>

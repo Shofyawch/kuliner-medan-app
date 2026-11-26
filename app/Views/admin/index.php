@@ -1,3 +1,11 @@
+<?php
+/**
+ * @var string $username
+ * @var string|null $token
+ */
+?>
+<!doctype html>
+
 <!doctype html>
 <html lang="id">
 

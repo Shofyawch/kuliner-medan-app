@@ -1,3 +1,16 @@
+<?php
+/**
+ * @var string|null $cari
+ * @var string|null $kecamatan
+ * @var string|null $sarapan
+ * @var string|null $ratingMin
+ * @var array $daftarKecamatan
+ * @var array $hotels
+ * @var array|null $meta
+ */
+?>
+<?= $this->extend('layouts/main') ?>
+
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('konten') ?>

@@ -1,3 +1,16 @@
+<?php
+/**
+ * @var array|null $hasil
+ * @var float|null $lat
+ * @var float|null $lng
+ * @var array $patokan
+ * @var string|null $pilihan
+ * @var float|int|string $radius
+ * @var string|null $asal
+ */
+?>
+<?= $this->extend('layouts/main') ?>
+
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('head') ?>

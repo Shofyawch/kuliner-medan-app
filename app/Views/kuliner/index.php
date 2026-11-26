@@ -1,3 +1,17 @@
+<?php
+/**
+ * @var array $daftarKategori
+ * @var array $daftarKecamatan
+ * @var string $kategori
+ * @var string $kecamatan
+ * @var string $cari
+ * @var string $harga
+ * @var string $urut
+ * @var array $restoran
+ * @var \CodeIgniter\Pager\Pager $pager
+ */
+?>
+
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('konten') ?>

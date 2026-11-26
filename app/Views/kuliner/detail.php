@@ -1,3 +1,11 @@
+<?php
+/**
+ * @var array $r
+ * @var array $menu
+ * @var array|null $ulasanSaya
+ */
+?>
+
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('head') ?>
