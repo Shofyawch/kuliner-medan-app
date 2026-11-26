@@ -19,14 +19,12 @@ class Kuliner extends BaseController
         $cari      = $ambil('q');
         $kecamatan = $ambil('kecamatan');
         $harga     = $ambil('harga');
-        $urut      = $ambil('urut');
 
         if (!in_array($harga, ['murah', 'sedang', 'mahal'], true)) {
             $harga = null;
         }
-        if (!in_array($urut, ['rating', 'murah'], true)) {
-            $urut = null;
-        }
+        $urut = (array) $this->request->getGet('urut');
+        $urut = array_values(array_intersect($urut, ['rating', 'harga']));
 
         $db = db_connect();
         $daftarKategori = $db->table('restoran')
@@ -60,15 +58,19 @@ class Kuliner extends BaseController
             $model->where('harga_max >', 60000);
         }
 
-        if ($urut === 'rating') {
-            $model->orderBy('COALESCE(rating,0)', 'DESC', false)
-                  ->orderBy('COALESCE(jumlah_ulasan,0)', 'DESC', false);
-        } elseif ($urut === 'murah') {
-            $model->orderBy('COALESCE(harga_min,999999999)', 'ASC', false)
-                  ->orderBy('nama', 'ASC');
-        } else {
-            $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false);
-        }
+        if (in_array('rating', $urut, true)) {
+    $model->orderBy('COALESCE(rating,0)', 'DESC', false)
+          ->orderBy('COALESCE(jumlah_ulasan,0)', 'DESC', false);
+}
+if (in_array('harga', $urut, true)) {
+    $model->orderBy('COALESCE(harga_min,999999999)', 'ASC', false);
+}
+if (empty($urut)) {
+    // "Paling cocok" (default)
+    $model->orderBy('(COALESCE(rating,0)*COALESCE(jumlah_ulasan,0)+43)/(COALESCE(jumlah_ulasan,0)+10)', 'DESC', false);
+} else {
+    $model->orderBy('nama', 'ASC'); // pembeda terakhir supaya urutan stabil
+}
 
         $restoran = \App\Libraries\RatingWeb::tempel($model->paginate(20));
         $model->pager->only(['kategori', 'q', 'kecamatan', 'harga', 'urut']);
@@ -104,9 +106,12 @@ class Kuliner extends BaseController
         if (is_numeric($restoran['latitude']) && is_numeric($restoran['longitude'])) {
             $semua = db_connect()
                 ->query('SELECT * FROM restoran_terdekat(?, ?, ?, ?)', [
-                    (float) $restoran['latitude'], (float) $restoran['longitude'], 2.0, 8,
+                    (float) $restoran['latitude'],
+                    (float) $restoran['longitude'],
+                    2.0,
+                    8,
                 ])->getResultArray();
-            $semua   = array_filter($semua, static fn ($x) => $x['slug'] !== $slug);
+            $semua   = array_filter($semua, static fn($x) => $x['slug'] !== $slug);
             $sekitar = array_slice(array_values($semua), 0, 5);
 
             // Ambil hotel terdekat dari API Singgah Medan menggunakan koordinat GPS & kecamatan restoran
@@ -141,7 +146,8 @@ class Kuliner extends BaseController
                     ->where('restoran_id', $restoran['id'])
                     ->where('pengguna_id', $penggunaId)
                     ->get()->getRowArray();
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
         }
 
         return view('kuliner/detail', [
