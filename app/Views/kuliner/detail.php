@@ -231,7 +231,11 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(peta);
 var isi = document.createElement('b');
 isi.textContent = nama;
-L.marker([lat, lng]).addTo(peta).bindPopup(isi);
+L.marker([lat, lng]).addTo(peta).bindTooltip(isi, {
+  permanent: true,
+  direction: 'top',
+  offset: [0, -36]
+});
 window.addEventListener('load', function () { peta.invalidateSize(); peta.setView([lat, lng], 16); });
 </script>
 <?= $this->endSection() ?>
