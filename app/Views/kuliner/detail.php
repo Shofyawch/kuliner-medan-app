@@ -240,17 +240,11 @@ foreach ($menu as $m) {
 <script>
 var lat = <?= (float) $r['latitude'] ?>, lng = <?= (float) $r['longitude'] ?>;
 var nama = <?= json_encode($r['nama'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-var petaJalan = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+var peta = L.map('peta').setView([lat, lng], 16);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  subdomains: 'abcd',
-  attribution: '&copy; OpenStreetMap &copy; CARTO'
-});
-var petaSatelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
-  maxZoom: 19,
-  attribution: '&copy; Esri, Maxar, Earthstar Geographics'
-});
-var peta = L.map('peta', { layers: [petaJalan] }).setView([lat, lng], 16);
-L.control.layers({ 'Peta Bersih': petaJalan, 'Satelit': petaSatelit }, null, { position: 'topright' }).addTo(peta);
+  attribution: '&copy; kontributor OpenStreetMap'
+}).addTo(peta);
 var isi = document.createElement('b');
 isi.textContent = nama;
 L.marker([lat, lng]).addTo(peta).bindTooltip(isi, {

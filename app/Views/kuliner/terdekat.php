@@ -127,18 +127,11 @@ var data = <?= json_encode(array_map(static fn ($r) => [
     'latitude' => $r['latitude'], 'longitude' => $r['longitude'], 'jarak_km' => $r['jarak_km'],
 ], $hasil), $f) ?>;
 
-var petaJalan = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+var peta = L.map('peta').setView([asal.lat, asal.lng], 15);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  subdomains: 'abcd',
-  attribution: '&copy; OpenStreetMap &copy; CARTO'
-});
-var petaSatelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
-  maxZoom: 19,
-  attribution: '&copy; Esri, Maxar, Earthstar Geographics'
-});
-
-var peta = L.map('peta', { layers: [petaJalan] }).setView([asal.lat, asal.lng], 15);
-L.control.layers({ 'Peta Bersih': petaJalan, 'Satelit': petaSatelit }, null, { position: 'topright' }).addTo(peta);
+  attribution: '&copy; kontributor OpenStreetMap'
+}).addTo(peta);
 
 var lingkaran = L.circle([asal.lat, asal.lng], {radius: asal.radius * 1000, color: '#2f6f3e', weight: 1.5, fillColor: '#2f6f3e', fillOpacity: 0.06}).addTo(peta);
 L.circleMarker([asal.lat, asal.lng], {radius: 9, color: '#fff', weight: 2, fillColor: '#2f6f3e', fillOpacity: 1})
