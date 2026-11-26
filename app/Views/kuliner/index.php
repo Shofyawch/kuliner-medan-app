@@ -271,6 +271,29 @@
     font-size: 14px
   }
 
+    .btn-terapkan {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--kunyit);
+    color: var(--arang);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer
+  }
+
+  .btn-terapkan:hover {
+    background: #ffd24d
+  }
+
+  .btn-terapkan:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px
+  }
+
   /* dropdown urutan (boleh pilih lebih dari satu) */
   .multi {
     position: relative;
@@ -613,14 +636,14 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
   <div class="br-alat">
     <h2><?= $pager->getTotal() ?> restoran<?= $kategori ? ' ' . esc($kategori) : '' ?></h2>
 
-    <select name="kecamatan" form="form-cari" aria-label="Kecamatan" onchange="this.form.submit()">
+    <select name="kecamatan" form="form-cari" aria-label="Kecamatan">
       <option value="">Semua kecamatan</option>
       <?php foreach ($daftarKecamatan as $kc): ?>
         <option value="<?= esc($kc['kecamatan']) ?>" <?= $kecamatan === $kc['kecamatan'] ? 'selected' : '' ?>><?= esc($kc['kecamatan']) ?> (<?= $kc['jumlah'] ?>)</option>
       <?php endforeach; ?>
     </select>
 
-    <select name="harga" form="form-cari" aria-label="Harga" onchange="this.form.submit()">
+    <select name="harga" form="form-cari" aria-label="Harga">
       <option value="">Semua harga</option>
       <option value="murah" <?= $harga === 'murah' ? 'selected' : '' ?>>Murah (sampai Rp 25 rb)</option>
       <option value="sedang" <?= $harga === 'sedang' ? 'selected' : '' ?>>Sedang (Rp 25&ndash;60 rb)</option>
@@ -643,6 +666,8 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
         <?php endforeach; ?>
       </div>
     </details>
+
+    <button type="submit" form="form-cari" class="btn-terapkan">Terapkan</button>
 
     <?php if ($aktifFilter): ?><a href="/#pilih">Atur ulang</a><?php endif; ?>
   </div>
@@ -698,25 +723,36 @@ $total = array_sum(array_column($daftarKategori, 'jumlah'));
 <script>
   (function() {
     var kotak = document.getElementById('urut-multi');
-    var form = document.getElementById('form-cari');
-    if (!kotak || !form) return;
+    if (!kotak) return;
 
     var semua = kotak.querySelectorAll('input[name="urut[]"]');
     var bawaan = document.getElementById('urut-default');
+    var ringkas = kotak.querySelector('summary');
 
-    // "Paling cocok" dipilih -> lepas semua pilihan lain
+    function perbaruiTeks() {
+      var dipilih = Array.prototype.filter.call(semua, function(x) { return x.checked; });
+      if (dipilih.length === 0) {
+        ringkas.textContent = 'Paling cocok';
+      } else if (dipilih.length === 1) {
+        ringkas.textContent = dipilih[0].parentNode.textContent.trim();
+      } else {
+        ringkas.textContent = dipilih.length + ' urutan dipilih';
+      }
+    }
+
+    // "Paling cocok" dipilih -> lepas pilihan lain
     bawaan.addEventListener('change', function() {
       semua.forEach(function(c) { c.checked = false; });
       bawaan.checked = true;
-      form.submit();
+      perbaruiTeks();
     });
 
-    // pilihan lain berubah -> "Paling cocok" ikut menyesuaikan
+    // pilihan lain berubah -> "Paling cocok" menyesuaikan
     semua.forEach(function(c) {
       c.addEventListener('change', function() {
         var ada = Array.prototype.some.call(semua, function(x) { return x.checked; });
         bawaan.checked = !ada;
-        form.submit();
+        perbaruiTeks();
       });
     });
 
